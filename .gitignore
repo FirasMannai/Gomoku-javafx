@@ -1,0 +1,29 @@
+# Maven build output
+target/
+dependency-reduced-pom.xml
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Runtime output
+gomoku_debug.txt
+savedgame.xml
+
+# OS
+.DS_Store
+Thumbs.db
