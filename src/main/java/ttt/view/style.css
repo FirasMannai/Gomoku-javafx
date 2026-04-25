@@ -1,0 +1,211 @@
+/* ===== Gomoku JavaFX — Dark Modern Theme ===== */
+
+/* --- Root --- */
+.root {
+    -fx-background-color: #1e1e28;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-text-fill: #d0d0e0;
+}
+
+/* --- Launcher --- */
+.launcher-root {
+    -fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);
+}
+
+/* --- Toolbar --- */
+.toolbar {
+    -fx-background-color: #14141c;
+    -fx-padding: 8 14 8 14;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+    -fx-border-color: transparent transparent #2a2a3a transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* --- Styled Buttons (base) --- */
+.styled-button {
+    -fx-background-color: #3a3a4a;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 18 8 18;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);
+}
+.styled-button:hover {
+    -fx-background-color: #4a4a5a;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 6, 0, 0, 3);
+}
+.styled-button:pressed {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 1);
+}
+
+/* Restart - green */
+.btn-restart {
+    -fx-background-color: #009944;
+}
+.btn-restart:hover {
+    -fx-background-color: #00b352;
+}
+
+/* Undo - blue */
+.btn-undo {
+    -fx-background-color: #0066cc;
+}
+.btn-undo:hover {
+    -fx-background-color: #0080ff;
+}
+.btn-undo:disabled {
+    -fx-background-color: #555555;
+    -fx-text-fill: #999999;
+    -fx-opacity: 0.7;
+}
+
+/* Hint - purple */
+.btn-hint {
+    -fx-background-color: #8833aa;
+}
+.btn-hint:hover {
+    -fx-background-color: #aa44cc;
+}
+
+/* Quit - red */
+.btn-quit {
+    -fx-background-color: #cc2222;
+}
+.btn-quit:hover {
+    -fx-background-color: #ee3333;
+}
+
+/* Save - dark gray */
+.btn-save {
+    -fx-background-color: #505060;
+}
+.btn-save:hover {
+    -fx-background-color: #606075;
+}
+
+/* Load - dark gray */
+.btn-load {
+    -fx-background-color: #505060;
+}
+.btn-load:hover {
+    -fx-background-color: #606075;
+}
+
+/* --- Title Label (GOMOKU) --- */
+.title-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    -fx-background-color: #22223a;
+    -fx-padding: 15;
+    -fx-spacing: 15;
+    -fx-pref-width: 260;
+    -fx-border-color: #2a2a3a transparent transparent transparent;
+    -fx-border-width: 0 0 0 1;
+}
+
+/* --- Card Panel --- */
+.card-panel {
+    -fx-background-color: #2c2c46;
+    -fx-background-radius: 8;
+    -fx-border-color: #3c3c5a;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
+/* --- Card Title --- */
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c0c0e0;
+    -fx-padding: 0 0 6 0;
+}
+
+/* --- Card Key Labels --- */
+.card-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #9898b4;
+}
+
+/* --- Card Value Labels --- */
+.card-value {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e8e8ff;
+}
+
+/* --- Status Bar --- */
+.status-bar {
+    -fx-background-color: #14141c;
+    -fx-padding: 5 12 5 12;
+    -fx-border-color: #2a2a3a transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+.status-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8888a8;
+}
+
+/* --- ComboBox in launcher --- */
+.combo-box {
+    -fx-background-color: #2a2a44;
+    -fx-border-color: #3c3c5c;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-font-size: 14px;
+}
+.combo-box .list-cell {
+    -fx-text-fill: #d0d0e0;
+    -fx-background-color: #2a2a44;
+    -fx-font-size: 14px;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: #2a2a44;
+}
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #2a2a44;
+    -fx-text-fill: #d0d0e0;
+}
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #3a3a5a;
+}
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #4a4a6a;
+    -fx-text-fill: white;
+}
+
+/* --- CheckBox --- */
+.check-box {
+    -fx-text-fill: #c8c8dc;
+    -fx-font-size: 14px;
+}
+.check-box .box {
+    -fx-background-color: #2a2a44;
+    -fx-border-color: #4a4a6a;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+.check-box:selected .box {
+    -fx-background-color: #0066cc;
+}
+
+/* --- Alert dialogs --- */
+.dialog-pane {
+    -fx-background-color: #22223a;
+}
+.dialog-pane .content {
+    -fx-text-fill: #d0d0e0;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #1a1a2e;
+}
