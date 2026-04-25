@@ -1,0 +1,345 @@
+@startuml GomokuFX_ClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #1e1e2e
+skinparam class {
+    BackgroundColor #2a2a3e
+    BorderColor #7070a0
+    FontColor #dcdcf0
+    HeaderBackgroundColor #3a3a5e
+    ArrowColor #9898b4
+}
+skinparam note {
+    BackgroundColor #3a3a5e
+    BorderColor #7070a0
+    FontColor #dcdcf0
+}
+
+' ─────────────────────────────────────────
+'  INTERFACES  (ttt.logic)
+' ─────────────────────────────────────────
+
+package "ttt.logic" {
+
+    interface IGame<M> {
+        + moves() : List<M>
+        + doMove(move: M) : IGame<M>
+        + currentPlayer() : byte
+        + otherPlayer(player: byte) : byte
+        + noMoreMove() : boolean
+        + endedGame() : boolean
+        + wins(player: byte) : boolean
+        + evalState(player: byte) : int
+    }
+
+    interface IRegularGame<M> {
+        + getRows() : byte
+        + getCols() : byte
+        + getPlayer1() : byte
+        + getPlayer2() : byte
+        + getPlayerNone() : byte
+        + getAtPosition(row: byte, col: byte) : byte
+        + setAtPosition(row: byte, col: byte) : IRegularGame<M>
+    }
+
+    IGame <|-- IRegularGame
+
+    interface IGameKI<M> {
+        + doBestMove(game: IGame<M>) : IGame<M>
+        + bestMove(game: IGame<M>) : M
+    }
+
+    ' ─────────────────────────────────────
+    '  ABSTRACT BASE CLASS
+    ' ─────────────────────────────────────
+
+    abstract class ARegularGame<M> {
+        # {static} NONE : byte
+        # {static} ONE  : byte
+        # {static} TWO  : byte
+        # ROWS : byte
+        # COLS : byte
+        # player : byte
+        # board : byte[][]
+        # movesDone : int
+        # lastRow : byte
+        # lastCol : byte
+        + getRows() : byte
+        + getCols() : byte
+        + getPlayer1() : byte
+        + getPlayer2() : byte
+        + getPlayerNone() : byte
+        + currentPlayer() : byte
+        + otherPlayer(p: byte) : byte
+        # lastPlayer() : byte
+        + getAtPosition(row: byte, col: byte) : byte
+        + endedGame() : boolean
+        + clone() : ARegularGame<M>
+        + {abstract} moves() : List<M>
+        + {abstract} setAtPosition(row: byte, col: byte) : IRegularGame<M>
+        + {abstract} doMove(move: M) : IRegularGame<M>
+        + {abstract} noMoreMove() : boolean
+        + {abstract} wins(player: byte) : boolean
+        + {abstract} evalState(player: byte) : int
+    }
+
+    IRegularGame <|.. ARegularGame
+
+    ' ─────────────────────────────────────
+    '  CONCRETE GAME
+    ' ─────────────────────────────────────
+
+    class Gomoku {
+        + {static} DEFAULT_SIZE : byte = 15
+        - {static} CENTER_WEIGHTS : int[][]
+        - winningStones : List<Pair<Byte,Byte>>
+        + Gomoku()
+        + Gomoku(rows: byte, cols: byte)
+        + evalStateForPosition(player: byte, row: byte, col: byte) : int
+        + evalState(player: byte) : int
+        + moves() : List<Pair<Byte,Byte>>
+        + setAtPosition(row: byte, col: byte) : IRegularGame<Pair<Byte,Byte>>
+        + doMove(move: Pair<Byte,Byte>) : IRegularGame<Pair<Byte,Byte>>
+        + noMoreMove() : boolean
+        + wins(player: byte) : boolean
+        + getWinningStones() : List<Pair<Byte,Byte>>
+    }
+
+    ARegularGame <|-- Gomoku
+
+    ' ─────────────────────────────────────
+    '  AI STRATEGIES
+    ' ─────────────────────────────────────
+
+    class StrategyRandom<M> {
+        - rand : Random
+        + doBestMove(game: IGame<M>) : IGame<M>
+        + bestMove(game: IGame<M>) : M
+    }
+
+    class StrategyBlock<M> {
+        + doBestMove(game: IGame<M>) : IGame<M>
+        + bestMove(game: IGame<M>) : M
+    }
+
+    class StrategyMinimax<M> {
+        + doBestMove(game: IGame<M>) : IGame<M>
+        + bestMove(game: IGame<M>) : M
+        + bestMove(game: IGame<M>, depth: int) : M
+        # evalNextState(game: IGame<M>, player: byte, depth: int) : int
+        # minimax(game: IGame<M>, player: byte, depth: int) : int
+        # getDepth() : int
+    }
+
+    class StrategyAlphaBeta<M> {
+        - maxDepth : int = 4
+        + doBestMove(game: IGame<M>) : IGame<M>
+        + bestMove(game: IGame<M>) : M
+        - alphabeta(game: IGame<M>, player: byte, depth: int,\n  alpha: int, beta: int, isMaximizing: boolean) : int
+    }
+
+    IGameKI <|.. StrategyRandom
+    IGameKI <|.. StrategyBlock
+    IGameKI <|.. StrategyMinimax
+    IGameKI <|.. StrategyAlphaBeta
+
+    StrategyBlock ..> StrategyRandom : <<uses as fallback>>
+
+    ' ─────────────────────────────────────
+    '  UTILITIES
+    ' ─────────────────────────────────────
+
+    class Pair<A, B> {
+        + first  : A
+        + second : B
+        + Pair(first: A, second: B)
+    }
+
+    class Debugger {
+        - {static} fileWriter : PrintWriter
+        - {static} enabled : boolean
+        - {static} headerPrinted : boolean
+        + {static} init(debugMode: boolean) : void
+        + {static} isDebug() : boolean
+        + {static} printMoveHeader() : void
+        + {static} log(player: int, row: int, col: int) : void
+        + {static} logMessage(msg: String) : void
+        + {static} close() : void
+    }
+
+    class XMLGameStorage {
+        + {static} save(game: IRegularGame<Pair<Byte,Byte>>, file: File) : void
+        + {static} load(file: File) : Gomoku
+    }
+
+    XMLGameStorage ..> Gomoku : <<creates>>
+    XMLGameStorage ..> IRegularGame : <<reads>>
+
+    class GomokuNetwork {
+        - socket : Socket
+        - in : BufferedReader
+        - out : PrintWriter
+        + isServer : boolean
+        + GomokuNetwork(port: int)
+        + GomokuNetwork(host: String, port: int)
+        + sendMove(row: int, col: int) : void
+        + receiveMove() : int[]
+        + close() : void
+    }
+
+    class GomokuNetworkControl<M> {
+        # game : IRegularGame<M>
+        - net : GomokuNetwork
+        - isServer : boolean
+        - myTurn : boolean
+        + GomokuNetworkControl(game: IRegularGame<M>,\n  hostOrServer: String, port: int)
+        + makeLocalMove(r: int, c: int) : void
+        + getGame() : IRegularGame<M>
+        + isMyTurn() : boolean
+    }
+
+    GomokuNetworkControl *-- GomokuNetwork
+    GomokuNetworkControl ..> IRegularGame : <<manages>>
+
+}
+
+' ─────────────────────────────────────────
+'  FX PACKAGE  (ttt.fx)
+' ─────────────────────────────────────────
+
+package "ttt.fx" {
+
+    class GomokuMain {
+        - {static} MODE_PATTERN : Pattern
+        - {static} STRAT_PATTERN : Pattern
+        + {static} main(args: String[]) : void
+        - {static} printHelpAndExit() : void
+        - {static} createStrategy(code: String) : IGameKI<Pair<Byte,Byte>>
+    }
+
+    class GomokuFXApp {
+        + start(stage: Stage) : void
+        + {static} startGame(stage: Stage, mode: String,\n  strat1Code: String, strat2Code: String) : void
+        + {static} showLauncher(stage: Stage) : void
+        + {static} main(args: String[]) : void
+    }
+
+    class GomokuLauncherFX {
+        - stage : Stage
+        - modeBox : ComboBox<String>
+        - strat1Box : ComboBox<String>
+        - strat2Box : ComboBox<String>
+        - debugBox : CheckBox
+        + GomokuLauncherFX(stage: Stage)
+        - initUI() : void
+        - onStartGame() : void
+        + {static} createStrategy(code: String) : IGameKI<Pair<Byte,Byte>>
+    }
+
+    class GomokuControllerFX {
+        - stage : Stage
+        - mode : String
+        - ai1 : IGameKI<Pair<Byte,Byte>>
+        - ai2 : IGameKI<Pair<Byte,Byte>>
+        - hintAI : IGameKI<Pair<Byte,Byte>>
+        - currentGame : IRegularGame<Pair<Byte,Byte>>
+        - history : List<IRegularGame<Pair<Byte,Byte>>>
+        - view : GomokuGameView
+        - boardFX : GomokuBoardFX
+        - blackWins : int
+        - whiteWins : int
+        - hintMove : Pair<Byte,Byte>
+        - ccTimeline : Timeline
+        - playerMoveStartNanos : long
+        + GomokuControllerFX(game: IRegularGame<Pair<Byte,Byte>>,\n  ai1: IGameKI<Pair<Byte,Byte>>,\n  ai2: IGameKI<Pair<Byte,Byte>>,\n  mode: String, stage: Stage)
+        + getGame() : IRegularGame<Pair<Byte,Byte>>
+        + getMode() : String
+        + getAI1() : IGameKI<Pair<Byte,Byte>>
+        + getAI2() : IGameKI<Pair<Byte,Byte>>
+        + onBoardClicked(row: byte, col: byte) : void
+        - doAIMove() : void
+        - startCCMode() : void
+        + restartGame() : void
+        + undoTwoMoves() : void
+        + computeHint() : void
+        + saveGame() : void
+        + loadGame() : void
+        + quitToLauncher() : void
+        - updateUI() : void
+        - showResult() : void
+    }
+
+    class GomokuGameView {
+        - controller : GomokuControllerFX
+        - boardFX : GomokuBoardFX
+        - turnLabel : Label
+        - blackScoreLabel : Label
+        - redScoreLabel : Label
+        - lastMoveLabel : Label
+        - aiThinkLabel : Label
+        - playerTimeLabel : Label
+        - statusLabel : Label
+        - undoButton : Button
+        + GomokuGameView(controller: GomokuControllerFX,\n  boardFX: GomokuBoardFX, stage: Stage)
+        + setTurnText(text: String) : void
+        + setBlackScore(text: String) : void
+        + setRedScore(text: String) : void
+        + setLastMove(text: String) : void
+        + setAIThinkTime(text: String) : void
+        + setPlayerTime(text: String) : void
+        + setStatus(text: String) : void
+        + setUndoEnabled(enabled: boolean) : void
+    }
+
+    class GomokuBoardFX {
+        - {static} MARGIN : double = 28
+        - controller : GomokuControllerFX
+        - game : IRegularGame<Pair<Byte,Byte>>
+        - previewRow : int
+        - previewCol : int
+        - hintMove : Pair<Byte,Byte>
+        + GomokuBoardFX(controller: GomokuControllerFX)
+        + setGame(game: IRegularGame<Pair<Byte,Byte>>) : void
+        + setHintMove(move: Pair<Byte,Byte>) : void
+        + redraw() : void
+        - handleMouseMove(e: MouseEvent) : void
+        - handleMouseClick(e: MouseEvent) : void
+        - getRowColFromMouse(mouseX: double, mouseY: double) : int[]
+    }
+
+}
+
+' ─────────────────────────────────────────
+'  CROSS-PACKAGE RELATIONSHIPS
+' ─────────────────────────────────────────
+
+GomokuMain ..> GomokuFXApp : <<delegates to>>
+
+GomokuFXApp ..> GomokuLauncherFX : <<creates>>
+GomokuFXApp ..> GomokuControllerFX : <<creates>>
+GomokuFXApp ..> Debugger : <<uses>>
+GomokuFXApp ..> GomokuLauncherFX : <<uses createStrategy>>
+
+GomokuLauncherFX ..> Gomoku : <<creates>>
+GomokuLauncherFX ..> GomokuControllerFX : <<creates>>
+GomokuLauncherFX ..> Debugger : <<uses>>
+GomokuLauncherFX ..> IGameKI : <<creates>>
+
+GomokuControllerFX *-- GomokuBoardFX
+GomokuControllerFX *-- GomokuGameView
+GomokuControllerFX o-- IGameKI
+GomokuControllerFX ..> Gomoku : <<manages state>>
+GomokuControllerFX ..> XMLGameStorage : <<uses>>
+GomokuControllerFX ..> Debugger : <<uses>>
+GomokuControllerFX ..> StrategyAlphaBeta : <<uses for hints>>
+
+GomokuGameView --> GomokuControllerFX
+GomokuGameView --> GomokuBoardFX
+
+GomokuBoardFX --> GomokuControllerFX
+GomokuBoardFX ..> Gomoku : <<reads winningStones>>
+
+Gomoku ..> Pair : <<uses as move>>
+XMLGameStorage ..> Pair : <<uses>>
+
+@enduml
