@@ -31,7 +31,9 @@ This is a JavaFX Gomoku (Five-in-a-Row) game with a full MVC structure split acr
 ### `ttt.ai` — AI Strategies
 
 All implement `IGameKI<M>` with `doBestMove()` / `bestMove()`:
-- `StrategyRandom` → `StrategyBlock` → `StrategyMinimax` → `StrategyAlphaBeta` (increasing strength; AlphaBeta uses depth=4)
+- `StrategyRandom` → `StrategyBlock` → `StrategyMinimax(int depth)` → `StrategyAlphaBeta(int depth)` (increasing strength)
+- `StrategyRandom` and `StrategyBlock` do **not** use depth — Block only looks 1 move ahead (win or block), then falls back to random.
+- `StrategyMinimax` and `StrategyAlphaBeta` both accept a configurable depth (1–8) passed from the launcher slider. Both default to depth 3 if constructed without arguments.
 
 ### `ttt.storage` — Persistence
 
@@ -49,24 +51,35 @@ All implement `IGameKI<M>` with `doBestMove()` / `bestMove()`:
 ### `ttt.controller` — MVC Controller
 
 ```
-GomokuFXApp          (JavaFX entry point, manages Stage, parses CLI args)
-GomokuMain           (JAR entry point, delegates to GomokuFXApp)
-GomokuControllerFX   (game controller — bridges model ↔ view, handles undo/hint/save/load, drives AI turns)
+GomokuFXApp              (JavaFX entry point, manages Stage, parses CLI args)
+GomokuMain               (JAR entry point, delegates to GomokuFXApp)
+GomokuLauncherController (start-screen controller — reads UI state, refreshes labels, launches game)
+GomokuControllerFX       (game controller — bridges model ↔ view, handles undo/hint/save/load, drives AI turns)
 ```
 
+- `GomokuLauncherController` wires all start-screen toggle/slider events, keeps every dependent label in sync via `refresh()`, and contains `createStrategy(String, int)` — the factory that maps S1–S4 codes to AI instances. It is discarded the moment the game starts. Key helpers: `usesDepth(String code)` returns true only for MINIMAX/ALPHABETA (controls depth card visibility); `buildSummary()` uses `·` / `×` separators; `depthDescriptor()` includes estimated move time (e.g. `"Expert · ~18s"`).
 - `GomokuControllerFX` maintains a move history list for undo and uses `StrategyAlphaBeta` for hint computation. In PN mode it holds a `GomokuNetwork` connection, sends moves after each click, and runs a daemon thread to receive opponent moves via `Platform.runLater`.
 - `GomokuFXApp.startNetworkGame()` establishes the socket on a background thread (so the JavaFX UI stays responsive while the server waits), then calls `GomokuControllerFX.initNetwork()`.
 
 ### `ttt.view` — MVC View
 
 ```
-GomokuLauncherFX   (start screen: mode/strategy selection)
+GomokuLauncherFX   (start screen: mode/strategy/board-size selection, arcade design)
 GomokuGameView     (BorderPane layout: toolbar, sidebar, status bar)
 GomokuBoardFX      (Canvas: grid/stone rendering, mouse input, win animation, hint highlights)
 style.css          (dark theme — loaded via absolute path /ttt/view/style.css)
 ```
 
-- `GomokuLauncherFX.createStrategy()` is the public factory that maps strategy codes (S1–S4) to strategy instances.
+- `GomokuLauncherFX` is a pure view — no logic. It exposes toggle groups, the depth slider, and setters (`setPreview`, `setPlayerIcons`, `setDepthEnabled`, etc.) that `GomokuLauncherController` calls on every refresh. All public methods have Javadoc.
+- The start screen uses a **red/gold + midnight** arcade design:
+  - Background: gold radial glow at top over `#0f1419→#0b1016` dark gradient
+  - Title: `Label("GOMOKU 🎯")` with red neon dropshadow glow — emoji embedded in the same label, inheriting `.launcher-title` style
+  - Eyebrow: pulsing gold `Circle` + `FadeTransition` (1.6 s, INDEFINITE)
+  - Mode buttons: two `Circle` stone dots (black/red/ai) above text via `ContentDisplay.TOP`
+  - Board-size buttons: `Canvas` mini-grid graphic inside a `VBox`
+  - VS card: emoji `Label` layered over 58 px styled `Region` stone via `StackPane`
+  - Depth card: hidden (`setVisible`/`setManaged`) when PVP mode or when all active AI sides use S1/S2
+- Board sizes supported: 13×13 (Quick), 15×15 (Standard), 17×17 (Large), 19×19 (Epic).
 
 ### Module system
 

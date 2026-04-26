@@ -4,6 +4,7 @@ import ttt.util.Debugger;
 import ttt.model.Gomoku;
 import ttt.network.GomokuNetwork;
 import ttt.view.GomokuLauncherFX;
+import ttt.controller.GomokuLauncherController.StartSettings;
 import ttt.ai.IGameKI;
 import ttt.model.Pair;
 import javafx.application.Application;
@@ -72,9 +73,13 @@ public class GomokuFXApp extends Application {
             System.err.println("[ERROR] Debug init failed: " + ex.getMessage());
         }
 
-        IGameKI<Pair<Byte, Byte>> ai1 = GomokuLauncherFX.createStrategy(strat1Code);
-        IGameKI<Pair<Byte, Byte>> ai2 = GomokuLauncherFX.createStrategy(strat2Code);
+        IGameKI<Pair<Byte, Byte>> ai1 = GomokuLauncherController.createStrategy(strat1Code, 4);
+        IGameKI<Pair<Byte, Byte>> ai2 = GomokuLauncherController.createStrategy(strat2Code, 4);
         new GomokuControllerFX(new Gomoku(), ai1, ai2, mode, stage);
+    }
+
+    public static void startGame(Stage stage, StartSettings settings) {
+        GomokuLauncherController.initializeGame(stage, settings);
     }
 
     /**
@@ -124,12 +129,13 @@ public class GomokuFXApp extends Application {
      * @param stage The primary stage.
      */
     public static void showLauncher(Stage stage) {
-        GomokuLauncherFX launcher = new GomokuLauncherFX(stage);
-        Scene scene = new Scene(launcher, 560, 660);
+        GomokuLauncherFX launcher = new GomokuLauncherFX();
+        new GomokuLauncherController(launcher, stage);
+        Scene scene = new Scene(launcher, 1100, 700);
         scene.getStylesheets().add(GomokuFXApp.class.getResource("/ttt/view/style.css").toExternalForm());
         stage.setScene(scene);
-        stage.setMinWidth(500);
-        stage.setMinHeight(600);
+        stage.setMinWidth(940);
+        stage.setMinHeight(620);
     }
 
     public static void main(String[] args) {

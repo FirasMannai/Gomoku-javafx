@@ -143,7 +143,8 @@ public class GomokuGameView extends BorderPane {
             s1Name = "Player 1";
             s2Name = "Player 2";
         } else if ("PC".equals(mode)) {
-            s2Name = "Player";
+            s1Name = "Player";
+            s2Name = getStrategyName(controller.getAI1());
         }
 
         VBox modeCard = createCard("\uD83C\uDFAE Game Mode",

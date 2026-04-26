@@ -18,21 +18,34 @@ import java.util.List;
  * @param <M> The move type for the game.
  */
 public class StrategyMinimax<M> implements IGameKI<M> {
+    private final int depth;
+
+    public StrategyMinimax() {
+        this(3);
+    }
+
+    public StrategyMinimax(int depth) {
+        this.depth = Math.max(1, depth);
+    }
+
     /**
      * Executes the best move for the current player using the Minimax algorithm.
      *
      * @param game The current game state.
-     * @return The new game state after the best move, or the original state if no move is possible.
+     * @return The new game state after the best move, or the original state if no
+     *         move is possible.
      */
     @Override
     public IGame<M> doBestMove(IGame<M> game) {
         M move = bestMove(game);
-        if (move == null) return game;
+        if (move == null)
+            return game;
         return game.doMove(move);
     }
 
     /**
-     * Determines the best move for the current player using the default search depth.
+     * Determines the best move for the current player using the default search
+     * depth.
      *
      * @param game The current game state.
      * @return The best move found, or null if no moves are available.
@@ -43,16 +56,18 @@ public class StrategyMinimax<M> implements IGameKI<M> {
     }
 
     /**
-     * Determines the best move for the current player using the specified search depth.
+     * Determines the best move for the current player using the specified search
+     * depth.
      * Implements the Minimax decision process by evaluating all possible moves.
      *
-     * @param game The current game state.
+     * @param game  The current game state.
      * @param depth The maximum search depth for the Minimax algorithm.
      * @return The best move found, or null if no moves are available.
      */
     public M bestMove(IGame<M> game, int depth) {
         List<M> moves = game.moves();
-        if (moves.isEmpty()) return null;
+        if (moves.isEmpty())
+            return null;
         final byte player = game.currentPlayer();
         int val = Integer.MIN_VALUE;
         M result = null;
@@ -73,9 +88,9 @@ public class StrategyMinimax<M> implements IGameKI<M> {
     /**
      * Evaluates the next game state using the Minimax algorithm.
      *
-     * @param game The game state to evaluate.
+     * @param game   The game state to evaluate.
      * @param player The player for whom the evaluation is performed.
-     * @param depth The remaining search depth.
+     * @param depth  The remaining search depth.
      * @return The evaluation score for the game state.
      */
     protected int evalNextState(IGame<M> game, byte player, int depth) {
@@ -89,9 +104,9 @@ public class StrategyMinimax<M> implements IGameKI<M> {
      * alternating between maximizing and minimizing the evaluation score
      * depending on the current player.
      *
-     * @param game The current game state.
+     * @param game   The current game state.
      * @param player The player for whom the evaluation is performed.
-     * @param depth The remaining search depth.
+     * @param depth  The remaining search depth.
      * @return The evaluation score for the game state.
      */
     protected int minimax(IGame<M> game, byte player, int depth) {
@@ -103,7 +118,8 @@ public class StrategyMinimax<M> implements IGameKI<M> {
         boolean isMax = game.currentPlayer() == player;
         int resultVal = isMax ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         List<M> moves = game.moves();
-        if (moves.isEmpty()) return game.evalState(player);
+        if (moves.isEmpty())
+            return game.evalState(player);
 
         // Recursively evaluate all possible moves
         for (M move : moves) {
@@ -124,13 +140,6 @@ public class StrategyMinimax<M> implements IGameKI<M> {
      * @return The search depth (default is 3).
      */
     protected int getDepth() {
-        return 3; 
+        return depth;
     }
 }
-
-
-
-
-
-
-

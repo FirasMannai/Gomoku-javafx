@@ -21,8 +21,10 @@ Gomoku FX follows a full **MVC (Model-View-Controller)** pattern with dedicated 
          │
 ┌──────────────────────────────────────────────────────────────┐
 │                  Controller (ttt.controller)                 │
-│    GomokuFXApp  ──  GomokuMain  ──  GomokuControllerFX       │
-│    (entry points)               (bridges model ↔ view)       │
+│  GomokuFXApp ── GomokuMain ── GomokuLauncherController       │
+│  (entry points)               (start screen, AI factory)     │
+│                    GomokuControllerFX                        │
+│                    (bridges model ↔ view during game)        │
 └──────────────────────────────────────────────────────────────┘
          ▲
          │ (update display / user input)
@@ -43,7 +45,7 @@ Gomoku FX follows a full **MVC (Model-View-Controller)** pattern with dedicated 
 | `ttt.storage` | Persistence | `XMLGameStorage` |
 | `ttt.util` | Utilities | `Debugger` |
 | `ttt.network` | Networking (SERVER/CLIENT modes) | `GomokuNetwork`, `GomokuNetworkControl` |
-| `ttt.controller` | MVC Controller | `GomokuControllerFX`, `GomokuFXApp`, `GomokuMain` |
+| `ttt.controller` | MVC Controller | `GomokuFXApp`, `GomokuMain`, `GomokuLauncherController`, `GomokuControllerFX` |
 | `ttt.view` | MVC View | `GomokuLauncherFX`, `GomokuGameView`, `GomokuBoardFX` |
 
 ## Design Patterns Used
@@ -54,10 +56,10 @@ Gomoku FX follows a full **MVC (Model-View-Controller)** pattern with dedicated 
 
 **Classes:** 
 - `IGameKI<M>` (`ttt.ai`) — interface for all strategies
-- `StrategyRandom` — places stones randomly
-- `StrategyBlock` — blocks opponent threats
-- `StrategyMinimax` — full minimax tree search
-- `StrategyAlphaBeta` — minimax with alpha-beta pruning (strongest, depth=4)
+- `StrategyRandom` — places stones randomly (no depth)
+- `StrategyBlock` — wins immediately or blocks opponent's immediate win, falls back to random (no depth)
+- `StrategyMinimax(int depth)` — full minimax tree search; depth configurable at construction time
+- `StrategyAlphaBeta(int depth)` — minimax with alpha-beta pruning (strongest); depth configurable at construction time
 
 **Usage in Controller:**
 ```java
@@ -106,10 +108,18 @@ public abstract int evalState(byte player);
 - `GomokuBoardFX` — Canvas rendering (grid, stones, hints, animations)
 - Never calls game logic directly
 
-**Controller** (`ttt.controller`): `GomokuControllerFX`
+**Controller** (`ttt.controller`): two controllers, different lifecycles
+
+`GomokuLauncherController` (active until Start is clicked):
+- Wires all start-screen toggle/slider events
+- Calls `view.setXxx(...)` on every change to keep labels in sync
+- Contains `createStrategy(String, int)` — the AI factory used by both the GUI and CLI paths
+- Translates UI state into `StartSettings` and hands off to `GomokuFXApp`
+
+`GomokuControllerFX` (active during a match):
 - Bridges model and view
 - Handles user input (mouse clicks → moves)
-- Drives AI turns in PC/CC modes
+- Drives AI turns in PC/CC modes on a background thread
 - Manages undo history
 - Computes hints via `StrategyAlphaBeta`
 - Saves/loads games via `XMLGameStorage`
@@ -146,16 +156,16 @@ GomokuFXApp detects SERVER/CLIENT arg
 
 **Purpose:** Create AI strategy instances from string codes without exposing concrete classes.
 
-**Method:** `GomokuLauncherFX.createStrategy(String code)` (`ttt.view`)
+**Method:** `GomokuLauncherController.createStrategy(String code, int depth)` (`ttt.controller`)
 
 ```java
-public static IGameKI<Pair<Byte, Byte>> createStrategy(String code) {
+public static IGameKI<Pair<Byte, Byte>> createStrategy(String code, int depth) {
     if (code == null) return null;
-    switch (code) {
-        case "S2": return new StrategyBlock<>();
-        case "S3": return new StrategyMinimax<>();
-        case "S4": return new StrategyAlphaBeta<>();
-        default:   return new StrategyRandom<>();
+    switch (code.toUpperCase()) {
+        case "BLOCK":     case "S2": return new StrategyBlock<>();
+        case "MINIMAX":   case "S3": return new StrategyMinimax<>(depth);
+        case "ALPHABETA": case "S4": return new StrategyAlphaBeta<>(depth);
+        default:                     return new StrategyRandom<>();
     }
 }
 ```
@@ -164,7 +174,7 @@ public static IGameKI<Pair<Byte, Byte>> createStrategy(String code) {
 ```bash
 java -jar target/Gomokufx-1.0-SNAPSHOT.jar CC S2 S4
 #                                              ↓  ↓
-#                          createStrategy("S2") and createStrategy("S4")
+#                          createStrategy("S2", 4) and createStrategy("S4", 4)
 ```
 
 ---
@@ -194,3 +204,24 @@ public IRegularGame<Pair<Byte, Byte>> doMove(Pair<Byte, Byte> move) {
 3. **Polymorphism** — Strategies implement `IGameKI`; controller is agnostic to algorithm
 4. **Extensibility** — New AI strategies only require implementing `IGameKI` and adding a `createStrategy` case
 5. **Access Control** — `ARegularGame` protected fields exposed via public accessors (`getMovesDone`, `setPlayer`, etc.) rather than direct field access across packages
+
+---
+
+## Start Screen Design
+
+`GomokuLauncherFX` implements an arcade-style start screen (red/gold + midnight theme):
+
+| Element | JavaFX implementation |
+|---|---|
+| Background | Gold radial glow at top (`rgba(245,166,35,0.12)`) over dark `#0f1419→#0b1016` linear gradient |
+| GOMOKU title | `Label("GOMOKU 🎯")` with red neon glow dropshadow — emoji embedded in the same label, inheriting the `.launcher-title` style |
+| Animated pulse dot on eyebrow | `Circle` (gold `#f5a623`) + `FadeTransition` (1.6 s, loops) |
+| Mode buttons with stone dots | Two `Circle` nodes (black/red/ai colour) displayed above the label via `ContentDisplay.TOP` |
+| Board-size mini-grid previews | `Canvas` drawn per button inside a `VBox` graphic |
+| Emoji avatar in VS card | `Label` (emoji) layered over a `Region` (styled circle) inside a `StackPane` |
+| Depth card hidden when unused | `setVisible(false)` + `setManaged(false)`; hidden in PVP and when all active AI sides use S1/S2 |
+| Depth card shown only for S3/S4 | `GomokuLauncherController.usesDepth(code)` returns true only for MINIMAX and ALPHABETA |
+| Dynamic avatars (human vs AI) | `GomokuLauncherController.refresh()` calls `view.setPlayerIcons()` |
+| Depth descriptor with time hint | e.g. `"Balanced · ~0.8s"`, `"Expert · ~18s"` — shown in the depth card header |
+| Footer summary separators | Uses `·` and `×` (e.g. `PVA · 15×15 · ALPHABETA·D4`) |
+| Configurable board sizes | 13×13 / 15×15 / 17×17 / 19×19, passed into `new Gomoku(size, size)` |

@@ -23,7 +23,15 @@ import java.util.*;
  * @param <M> The move type for the game.
  */
 public class StrategyAlphaBeta<M> implements IGameKI<M> {
-    private final int maxDepth = 4; // Fixed depth
+    private final int maxDepth;
+
+    public StrategyAlphaBeta() {
+        this(4);
+    }
+
+    public StrategyAlphaBeta(int maxDepth) {
+        this.maxDepth = Math.max(1, maxDepth);
+    }
 
     /**
      * Executes the best move for the current player using Alpha-Beta pruning.

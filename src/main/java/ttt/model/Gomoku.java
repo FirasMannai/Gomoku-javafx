@@ -13,9 +13,6 @@ import java.util.ArrayList;
 public class Gomoku extends ARegularGame<Pair<Byte, Byte>> {
     public static final byte DEFAULT_SIZE = 15;
 
-    // Precomputed center-closeness weights for each board position
-    private static final int[][] CENTER_WEIGHTS = createCenterWeights(DEFAULT_SIZE);
-
     // Store the five winning stones (if game is won)
     private List<Pair<Byte, Byte>> winningStones = new ArrayList<>();
 
@@ -28,20 +25,16 @@ public class Gomoku extends ARegularGame<Pair<Byte, Byte>> {
         super(rows, cols);
     }
 
-    private static int[][] createCenterWeights(int size) {
-        int[][] weights = new int[size][size];
-        int center = size / 2;
-        for (int r = 0; r < size; r++) {
-            for (int c = 0; c < size; c++) {
-                weights[r][c] = size - Math.max(Math.abs(r - center), Math.abs(c - center));
-            }
-        }
-        return weights;
+    private int centerWeight(byte row, byte col) {
+        int centerRow = ROWS / 2;
+        int centerCol = COLS / 2;
+        int maxDistance = Math.max(Math.abs(row - centerRow), Math.abs(col - centerCol));
+        return Math.max(ROWS, COLS) - maxDistance;
     }
     
     //Evaluates board score for a single position of the given player
     public int evalStateForPosition(byte player, byte row, byte col) {
-        int score = CENTER_WEIGHTS[row][col];
+        int score = centerWeight(row, col);
         int[][] directions = {
             { 0, 1 },  // horizontal
             { 1, 0 },  // vertical

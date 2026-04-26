@@ -39,12 +39,14 @@ java -jar target/Gomokufx-1.0-SNAPSHOT.jar [MODE] [STRAT1] [STRAT2]
 
 **AI Strategies:**
 
-| Code | Name | Description |
-|------|------|-------------|
-| `S1` | Random | Places stones randomly |
-| `S2` | Block | Blocks opponent threats |
-| `S3` | Minimax | Full minimax search |
-| `S4` | AlphaBeta | Alpha-Beta pruning (strongest) |
+| Code | Name | Uses depth | Description |
+|------|------|------------|-------------|
+| `S1` | Random | No | Places stones randomly |
+| `S2` | Block | No | Wins immediately or blocks opponent's immediate win, then random |
+| `S3` | Minimax | Yes | Full minimax tree search |
+| `S4` | AlphaBeta | Yes | Minimax with alpha-beta pruning (strongest) |
+
+The depth slider (1–8) applies only to S3 and S4. S1 and S2 ignore it entirely.
 
 **Examples:**
 
@@ -70,7 +72,7 @@ ttt.ai/          — AI strategies: IGameKI, StrategyRandom/Block/Minimax/AlphaB
 ttt.storage/     — Persistence: XMLGameStorage (JDOM2)
 ttt.util/        — Utilities: Debugger
 ttt.network/     — Networking: GomokuNetwork, GomokuNetworkControl (SERVER/CLIENT CLI modes)
-ttt.controller/  — MVC Controller: GomokuControllerFX, GomokuFXApp, GomokuMain
+ttt.controller/  — MVC Controller: GomokuFXApp, GomokuMain, GomokuLauncherController, GomokuControllerFX
 ttt.view/        — MVC View: GomokuLauncherFX, GomokuGameView, GomokuBoardFX
 ```
 
@@ -81,16 +83,18 @@ ttt.view/        — MVC View: GomokuLauncherFX, GomokuGameView, GomokuBoardFX
 | **Strategy** | `IGameKI` — AI algorithms swapped at runtime without changing the controller |
 | **Template Method** | `ARegularGame` defines game lifecycle; `Gomoku` fills in the rules |
 | **MVC** | `ttt.model` / `ttt.view` / `ttt.controller` are fully separated |
-| **Factory Method** | `GomokuLauncherFX.createStrategy()` maps `S1`–`S4` codes to strategy instances |
+| **Factory Method** | `GomokuLauncherController.createStrategy()` maps `S1`–`S4` codes to strategy instances |
 | **Prototype** | `ARegularGame.clone()` — each move returns a new cloned state for safe AI search |
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full details and flow diagrams.
 
 ## Game Features
 
-- 15×15 board with standard Gomoku rules (5 in a row wins)
+- Configurable board size: 13×13 / 15×15 / 17×17 / 19×19
+- Standard Gomoku rules (5 in a row wins)
 - Four game modes: Player vs Player, Player vs Computer, Computer vs Computer, Network (SERVER/CLIENT)
 - Undo (PC mode) and hint system
 - Save/load games to XML
 - Debug mode — logs move trace to `gomoku_debug.txt`
 - Win highlight animation
+- Arcade-style start screen: red/gold + midnight theme, GOMOKU 🎯 title with neon glow, Canvas mini board previews, emoji player avatars, AI depth slider (shown only when S3/S4 is selected)

@@ -209,3 +209,281 @@
 .dialog-pane .header-panel {
     -fx-background-color: #1a1a2e;
 }
+
+/* ===== Modern Start Screen ===== */
+
+.gomoku-start-root {
+    -fx-background-color: #0b1016;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+/* Gold radial glow at top, matching HTML reference background */
+.gomoku-start-stage {
+    -fx-background-color:
+        radial-gradient(center 50% 0%, radius 55%, rgba(245,166,35,0.12), transparent),
+        linear-gradient(to bottom, #0f1419, #0b1016);
+}
+
+.hero-column {
+    -fx-padding: 8 0 0 0;
+}
+
+.launcher-eyebrow {
+    -fx-text-fill: #8b98a8;
+    -fx-font-size: 10px;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-weight: bold;
+}
+
+/* GOMOKU — red title with subtle glow */
+.launcher-title {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 58px;
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.55), 18, 0.25, 0, 0);
+}
+
+.launcher-subtitle {
+    -fx-text-fill: #9aa6b4;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 4;
+    -fx-max-width: 360;
+}
+
+.vs-preview-card,
+.settings-panel {
+    -fx-background-color: linear-gradient(to bottom, rgba(26,34,44,0.96), rgba(14,20,27,0.96));
+    -fx-background-radius: 14;
+    -fx-border-color: #263140;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 22, 0, 0, 10);
+}
+
+.preview-side-card {
+    -fx-background-radius: 10;
+    -fx-padding: 12 6 12 6;
+}
+
+.preview-side-card:hover {
+    -fx-background-color: rgba(255,255,255,0.035);
+}
+
+.preview-stone {
+    -fx-min-width: 58;
+    -fx-min-height: 58;
+    -fx-max-width: 58;
+    -fx-max-height: 58;
+    -fx-background-radius: 30;
+    -fx-border-radius: 30;
+    -fx-border-width: 2;
+}
+
+.preview-stone.black {
+    -fx-background-color: radial-gradient(center 35% 30%, radius 70%, #5a6172, #15181d 58%, #000000);
+    -fx-border-color: #0a0d11;
+}
+
+.preview-stone.red {
+    -fx-background-color: radial-gradient(center 35% 30%, radius 70%, #ff8a70, #d02a1a 58%, #5a0f0a);
+    -fx-border-color: #7a1a10;
+}
+
+.preview-side {
+    -fx-text-fill: #8b98a8;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.preview-name {
+    -fx-text-fill: #e6edf3;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.preview-strategy {
+    -fx-text-fill: #ef4444;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.vs-separator {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-style: italic;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.40), 14, 0, 0, 0);
+}
+
+.launcher-footer-summary {
+    -fx-text-fill: #5f6d7c;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.settings-panel {
+    -fx-padding: 16;
+}
+
+.settings-heading {
+    -fx-text-fill: #8b98a8;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.18em;
+}
+
+.settings-card {
+    -fx-background-color: #0e141b;
+    -fx-background-radius: 10;
+    -fx-border-color: #263140;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 11;
+}
+
+.settings-card:hover {
+    -fx-border-color: #334257;
+}
+
+.settings-card:disabled {
+    -fx-opacity: 0.42;
+}
+
+.field-title {
+    -fx-text-fill: #8b98a8;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.field-hint {
+    -fx-text-fill: #5a6776;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 10px;
+}
+
+.launcher-toggle {
+    -fx-background-color: #141c26;
+    -fx-background-radius: 8;
+    -fx-border-color: #263140;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #aab5c2;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 7 9 7;
+    -fx-cursor: hand;
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+}
+
+.launcher-toggle:hover {
+    -fx-border-color: #3a4a5e;
+    -fx-text-fill: #ffffff;
+}
+
+/* Crimson selected state */
+.launcher-toggle:selected {
+    -fx-background-color: linear-gradient(to bottom, rgba(239,68,68,0.18), rgba(239,68,68,0.05));
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #ffb4a6;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.18), 14, 0.25, 0, 0);
+}
+
+.launcher-toggle:disabled {
+    -fx-opacity: 0.58;
+}
+
+.strategy-toggle {
+    -fx-font-size: 10px;
+    -fx-padding: 8 5 8 5;
+}
+
+.size-toggle {
+    -fx-padding: 8 4 8 4;
+}
+
+.depth-value {
+    -fx-text-fill: #ef4444;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.depth-slider .track {
+    -fx-background-color: #263140;
+    -fx-background-radius: 4;
+    -fx-pref-height: 4;
+}
+
+.depth-slider .thumb {
+    -fx-background-color: #ef4444;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.65), 12, 0.2, 0, 0);
+}
+
+.depth-slider .axis {
+    -fx-tick-label-fill: #5a6776;
+}
+
+.meta-row {
+    -fx-padding: 12 0 0 0;
+    -fx-border-color: #263140 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.meta-row .check-box {
+    -fx-text-fill: #9aa6b4;
+    -fx-font-size: 12px;
+}
+
+.meta-row .check-box .box {
+    -fx-background-color: #263140;
+    -fx-border-color: #38475a;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.meta-row .check-box:selected .box {
+    -fx-background-color: #ef4444;
+    -fx-border-color: #ef4444;
+}
+
+.launcher-button {
+    -fx-min-height: 44;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0 22 0 22;
+}
+
+/* Crimson primary button */
+.launcher-button.primary {
+    -fx-background-color: linear-gradient(to bottom, #ef4444, #b02e2e);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.35), 20, 0.2, 0, 6);
+}
+
+.launcher-button.primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #f87171, #c43a3a);
+}
+
+.launcher-button.primary:pressed {
+    -fx-background-color: linear-gradient(to bottom, #b02e2e, #8b1a1a);
+}
+
+.launcher-button.ghost {
+    -fx-background-color: transparent;
+    -fx-border-color: #2a3544;
+    -fx-text-fill: #c3ccd7;
+}
+
+.launcher-button.ghost:hover {
+    -fx-background-color: #1a222c;
+    -fx-text-fill: #ffffff;
+}
