@@ -1,17 +1,27 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package ttt.ai;
 
 import ttt.model.IGame;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Weakest AI strategy: plays a uniformly random legal move.
+ *
+ * <p>Ignores search depth entirely. It also serves as the fallback for
+ * {@link StrategyBlock} once no immediate win or block is available.
+ *
+ * @param <M> the move type
+ */
 public class StrategyRandom<M> implements IGameKI<M> {
+
+    /** Source of randomness for move selection. */
     private final Random rand = new Random();
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Applies a randomly chosen legal move.
+     */
     @Override
     public IGame<M> doBestMove(IGame<M> game) {
         M move = bestMove(game);
@@ -19,12 +29,16 @@ public class StrategyRandom<M> implements IGameKI<M> {
         return game.doMove(move);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns a uniformly random move from the legal moves, or {@code null}
+     * if there are none (e.g. the game has ended).
+     */
     @Override
     public M bestMove(IGame<M> game) {
         List<M> moves = game.moves();
-        if (moves.isEmpty()) return null; // <- Prevents crash at game end!
+        if (moves.isEmpty()) return null; // prevents crash at game end
         return moves.get(rand.nextInt(moves.size()));
     }
 }
-
-

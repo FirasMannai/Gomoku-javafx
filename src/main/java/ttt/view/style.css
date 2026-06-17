@@ -1,377 +1,512 @@
-/* ===== Gomoku JavaFX — Dark Modern Theme ===== */
+/* ===== Gomoku JavaFX — Multi-Theme Stylesheet ===== */
+/*
+ * Every color is a JavaFX looked-up token (-c-*). Each theme below defines one
+ * full token block keyed by a class that ttt.view.ThemeManager applies to the
+ * scene root. The shared rules further down reference only tokens, so switching
+ * the root class re-themes the entire UI. A few themes add small "character"
+ * override blocks at the very end (hard shadows, neon text, etc.).
+ *
+ * Canvas board colors live in ThemeManager.BoardPalette (CSS can't reach Canvas).
+ */
 
-/* --- Root --- */
-.root {
-    -fx-background-color: #1e1e28;
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-text-fill: #d0d0e0;
+/* ---------- DARK (default arcade) ---------- */
+.theme-dark {
+    -c-glow: rgba(245,166,35,0.10);
+    -c-bg-top: #0f1419; -c-bg-bottom: #0b1016;
+    -c-text: #d0d0e0; -c-muted: #8b98a8; -c-dim: #5a6776; -c-dim2: #5f6d7c; -c-value: #e6edf3;
+    -c-ghost-text: #c3ccd7; -c-ghost-hover-text: #ffffff; -c-ghost-hover-bg: #1a222c;
+    -c-card: #0e141b; -c-panel-top: rgba(26,34,44,0.96); -c-panel-bottom: rgba(14,20,27,0.96);
+    -c-border: #263140; -c-border-hover: #334257; -c-border-soft: #2a3544; -c-border-soft-hover: #3a4a5e;
+    -c-toolbar-bg: rgba(10,14,20,0.97); -c-toggle-bg: #141c26; -c-toggle-sel-text: #ffb4a6;
+    -c-accent: #ef4444; -c-accent-deep: #b02e2e; -c-accent-deep2: #8b1a1a;
+    -c-accent-bright: #f87171; -c-accent-bright2: #c43a3a;
+    -c-gold: #f5a623; -c-board-wrap: #0d1218;
+    -c-combo-bg: #141c26; -c-combo-border: #263140;
+    -c-dialog-bg: #22223a; -c-dialog-header: #1a1a2e;
+    -c-accent-glow: rgba(239,68,68,0.45); -c-accent-tint: rgba(239,68,68,0.18); -c-accent-tint-soft: rgba(239,68,68,0.05);
 }
 
-/* --- Launcher --- */
+/* ---------- LIGHT ---------- */
+.theme-light {
+    -c-glow: rgba(245,166,35,0.18);
+    -c-bg-top: #f6f8fb; -c-bg-bottom: #e8edf3;
+    -c-text: #2b3440; -c-muted: #5a6b7d; -c-dim: #8a97a5; -c-dim2: #7c8a99; -c-value: #1d2630;
+    -c-ghost-text: #3a4654; -c-ghost-hover-text: #11181f; -c-ghost-hover-bg: #e6ecf3;
+    -c-card: #ffffff; -c-panel-top: rgba(255,255,255,0.97); -c-panel-bottom: rgba(236,241,247,0.97);
+    -c-border: #d3dae2; -c-border-hover: #b6c2cf; -c-border-soft: #cdd6df; -c-border-soft-hover: #aab8c6;
+    -c-toolbar-bg: rgba(247,250,252,0.98); -c-toggle-bg: #eef2f7; -c-toggle-sel-text: #b3251a;
+    -c-accent: #d8392b; -c-accent-deep: #b02e2e; -c-accent-deep2: #8b1a1a;
+    -c-accent-bright: #e85a4c; -c-accent-bright2: #c43a3a;
+    -c-gold: #c8860a; -c-board-wrap: #dde3ea;
+    -c-combo-bg: #ffffff; -c-combo-border: #c7d0da;
+    -c-dialog-bg: #f4f6f9; -c-dialog-header: #e7ecf2;
+    -c-accent-glow: rgba(216,57,43,0.35); -c-accent-tint: rgba(216,57,43,0.14); -c-accent-tint-soft: rgba(216,57,43,0.05);
+}
+
+/* ---------- NEO-BRUTALIST ---------- */
+.theme-brutalist {
+    -c-glow: transparent;
+    -c-bg-top: #FDF6E3; -c-bg-bottom: #FDF6E3;
+    -c-text: #111111; -c-muted: #333333; -c-dim: #555555; -c-dim2: #444444; -c-value: #111111;
+    -c-ghost-text: #111111; -c-ghost-hover-text: #ffffff; -c-ghost-hover-bg: #111111;
+    -c-card: #ffffff; -c-panel-top: #ffffff; -c-panel-bottom: #ffffff;
+    -c-border: #111111; -c-border-hover: #111111; -c-border-soft: #111111; -c-border-soft-hover: #111111;
+    -c-toolbar-bg: #FDF6E3; -c-toggle-bg: #ffffff; -c-toggle-sel-text: #2D5BFF;
+    -c-accent: #FF4D4D; -c-accent-deep: #d63030; -c-accent-deep2: #b71f1f;
+    -c-accent-bright: #FF6B6B; -c-accent-bright2: #e03e3e;
+    -c-gold: #2D5BFF; -c-board-wrap: #FDF6E3;
+    -c-combo-bg: #ffffff; -c-combo-border: #111111;
+    -c-dialog-bg: #FDF6E3; -c-dialog-header: #ffffff;
+    -c-accent-glow: transparent; -c-accent-tint: rgba(45,91,255,0.14); -c-accent-tint-soft: rgba(45,91,255,0.05);
+}
+
+/* ---------- AURORA GLASS ---------- */
+.theme-aurora {
+    -c-glow: rgba(94,234,212,0.16);
+    -c-bg-top: #1B1035; -c-bg-bottom: #0E2E3A;
+    -c-text: #eef0ff; -c-muted: #b9b0d8; -c-dim: #8a82a8; -c-dim2: #9a92b8; -c-value: #ffffff;
+    -c-ghost-text: #d8d2ee; -c-ghost-hover-text: #ffffff; -c-ghost-hover-bg: rgba(255,255,255,0.10);
+    -c-card: rgba(255,255,255,0.06); -c-panel-top: rgba(255,255,255,0.10); -c-panel-bottom: rgba(255,255,255,0.03);
+    -c-border: rgba(255,255,255,0.18); -c-border-hover: rgba(255,255,255,0.32);
+    -c-border-soft: rgba(255,255,255,0.18); -c-border-soft-hover: rgba(255,255,255,0.35);
+    -c-toolbar-bg: rgba(20,12,40,0.55); -c-toggle-bg: rgba(255,255,255,0.06); -c-toggle-sel-text: #5EEAD4;
+    -c-accent: #F472B6; -c-accent-deep: #b03a78; -c-accent-deep2: #82285a;
+    -c-accent-bright: #f88fc6; -c-accent-bright2: #c34d90;
+    -c-gold: #5EEAD4; -c-board-wrap: #150c2b;
+    -c-combo-bg: #2a1f4a; -c-combo-border: rgba(255,255,255,0.20);
+    -c-dialog-bg: #241a3e; -c-dialog-header: #1B1035;
+    -c-accent-glow: rgba(94,234,212,0.50); -c-accent-tint: rgba(94,234,212,0.18); -c-accent-tint-soft: rgba(244,114,182,0.06);
+}
+
+/* ---------- ZEN GOBAN ---------- */
+.theme-goban {
+    -c-glow: rgba(193,67,46,0.06);
+    -c-bg-top: #F3EAD8; -c-bg-bottom: #ECE0C8;
+    -c-text: #2B2B2B; -c-muted: #6F6354; -c-dim: #8a7d68; -c-dim2: #7c6f5a; -c-value: #1f1a12;
+    -c-ghost-text: #4a4234; -c-ghost-hover-text: #2B2B2B; -c-ghost-hover-bg: #E6DAC2;
+    -c-card: #FBF6EC; -c-panel-top: #FBF6EC; -c-panel-bottom: #F1E7D4;
+    -c-border: #d8caac; -c-border-hover: #c0ae8a; -c-border-soft: #d8caac; -c-border-soft-hover: #c0ae8a;
+    -c-toolbar-bg: #EFE6D2; -c-toggle-bg: #FBF6EC; -c-toggle-sel-text: #C1432E;
+    -c-accent: #C1432E; -c-accent-deep: #9c3424; -c-accent-deep2: #7a271a;
+    -c-accent-bright: #d35a44; -c-accent-bright2: #a83a2a;
+    -c-gold: #7C8C6E; -c-board-wrap: #ECE0C8;
+    -c-combo-bg: #FBF6EC; -c-combo-border: #d8caac;
+    -c-dialog-bg: #F3EAD8; -c-dialog-header: #ECE0C8;
+    -c-accent-glow: rgba(0,0,0,0.12); -c-accent-tint: rgba(193,67,46,0.12); -c-accent-tint-soft: rgba(193,67,46,0.05);
+}
+
+/* ---------- NEON GRID ---------- */
+.theme-neon {
+    -c-glow: rgba(0,229,255,0.12);
+    -c-bg-top: #0b0b18; -c-bg-bottom: #060610;
+    -c-text: #cfeffd; -c-muted: #6fa9c0; -c-dim: #4a7d92; -c-dim2: #5f93a8; -c-value: #eafcff;
+    -c-ghost-text: #8fd4e6; -c-ghost-hover-text: #ffffff; -c-ghost-hover-bg: rgba(0,229,255,0.08);
+    -c-card: #0a0a16; -c-panel-top: rgba(10,16,28,0.92); -c-panel-bottom: rgba(6,8,18,0.92);
+    -c-border: #143a4a; -c-border-hover: #1d6f86; -c-border-soft: #143a4a; -c-border-soft-hover: #00E5FF;
+    -c-toolbar-bg: rgba(8,8,18,0.95); -c-toggle-bg: #0a0a16; -c-toggle-sel-text: #FF2E97;
+    -c-accent: #00E5FF; -c-accent-deep: #0091b0; -c-accent-deep2: #006a80;
+    -c-accent-bright: #5cf0ff; -c-accent-bright2: #00b8d4;
+    -c-gold: #FFB800; -c-board-wrap: #080812;
+    -c-combo-bg: #0a0a16; -c-combo-border: #143a4a;
+    -c-dialog-bg: #0a0a16; -c-dialog-header: #060610;
+    -c-accent-glow: rgba(0,229,255,0.60); -c-accent-tint: rgba(0,229,255,0.16); -c-accent-tint-soft: rgba(255,46,151,0.06);
+}
+
+/* ---------- MATERIAL CLARITY ---------- */
+.theme-material {
+    -c-glow: rgba(91,91,214,0.07);
+    -c-bg-top: #FEF7FF; -c-bg-bottom: #F4EEFA;
+    -c-text: #1c1b1f; -c-muted: #49454F; -c-dim: #79747E; -c-dim2: #5f5d67; -c-value: #1c1b1f;
+    -c-ghost-text: #49454F; -c-ghost-hover-text: #1c1b1f; -c-ghost-hover-bg: #ECE6F0;
+    -c-card: #ffffff; -c-panel-top: #ffffff; -c-panel-bottom: #F7F2FA;
+    -c-border: #CAC4D0; -c-border-hover: #b0a9bb; -c-border-soft: #CAC4D0; -c-border-soft-hover: #b0a9bb;
+    -c-toolbar-bg: #F3EDF7; -c-toggle-bg: #ECE6F0; -c-toggle-sel-text: #21005D;
+    -c-accent: #5B5BD6; -c-accent-deep: #4848b8; -c-accent-deep2: #393995;
+    -c-accent-bright: #6d6de0; -c-accent-bright2: #4f4fc4;
+    -c-gold: #0E7C7B; -c-board-wrap: #E8DEF0;
+    -c-combo-bg: #ffffff; -c-combo-border: #CAC4D0;
+    -c-dialog-bg: #FEF7FF; -c-dialog-header: #ECE6F0;
+    -c-accent-glow: rgba(91,91,214,0.28); -c-accent-tint: rgba(91,91,214,0.12); -c-accent-tint-soft: rgba(91,91,214,0.05);
+}
+
+/* ============================================================
+   SHARED RULES (reference tokens only)
+   ============================================================ */
+
+/* --- Root (game screen background) --- */
+.root {
+    -fx-background-color:
+        radial-gradient(center 50% 0%, radius 55%, -c-glow, transparent),
+        linear-gradient(to bottom, -c-bg-top, -c-bg-bottom);
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-text-fill: -c-text;
+    -fx-text-base-color: -c-text;
+}
+
 .launcher-root {
-    -fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);
+    -fx-background-color: linear-gradient(to bottom, -c-bg-top, -c-bg-bottom);
 }
 
 /* --- Toolbar --- */
 .toolbar {
-    -fx-background-color: #14141c;
-    -fx-padding: 8 14 8 14;
+    -fx-background-color: -c-toolbar-bg;
+    -fx-padding: 10 14 10 14;
     -fx-spacing: 12;
     -fx-alignment: center-left;
-    -fx-border-color: transparent transparent #2a2a3a transparent;
+    -fx-border-color: transparent transparent -c-border transparent;
     -fx-border-width: 0 0 1 0;
 }
 
 /* --- Styled Buttons (base) --- */
 .styled-button {
-    -fx-background-color: #3a3a4a;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-padding: 8 18 8 18;
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);
-}
-.styled-button:hover {
-    -fx-background-color: #4a4a5a;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 6, 0, 0, 3);
-}
-.styled-button:pressed {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 1);
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-min-height: 34;
 }
 
-/* Restart - green */
-.btn-restart {
-    -fx-background-color: #009944;
+.btn-restart, .btn-save {
+    -fx-background-color: linear-gradient(to bottom, -c-accent, -c-accent-deep);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 16, 0.2, 0, 4);
 }
-.btn-restart:hover {
-    -fx-background-color: #00b352;
+.btn-restart:hover, .btn-save:hover {
+    -fx-background-color: linear-gradient(to bottom, -c-accent-bright, -c-accent-bright2);
+}
+.btn-restart:pressed, .btn-save:pressed {
+    -fx-background-color: linear-gradient(to bottom, -c-accent-deep, -c-accent-deep2);
+    -fx-effect: none;
 }
 
-/* Undo - blue */
-.btn-undo {
-    -fx-background-color: #0066cc;
+.btn-undo, .btn-load {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-border-soft;
+    -fx-border-width: 1;
+    -fx-text-fill: -c-ghost-text;
 }
-.btn-undo:hover {
-    -fx-background-color: #0080ff;
+.btn-undo:hover, .btn-load:hover {
+    -fx-background-color: -c-ghost-hover-bg;
+    -fx-border-color: -c-border-soft-hover;
+    -fx-text-fill: -c-ghost-hover-text;
 }
 .btn-undo:disabled {
-    -fx-background-color: #555555;
-    -fx-text-fill: #999999;
-    -fx-opacity: 0.7;
+    -fx-opacity: 0.38;
 }
 
-/* Hint - purple */
 .btn-hint {
-    -fx-background-color: #8833aa;
+    -fx-background-color: transparent;
+    -fx-border-color: -c-border-soft;
+    -fx-border-width: 1;
+    -fx-text-fill: -c-ghost-text;
 }
 .btn-hint:hover {
-    -fx-background-color: #aa44cc;
+    -fx-background-color: -c-ghost-hover-bg;
+    -fx-border-color: -c-gold;
+    -fx-text-fill: -c-gold;
 }
 
-/* Quit - red */
 .btn-quit {
-    -fx-background-color: #cc2222;
+    -fx-background-color: transparent;
+    -fx-border-color: -c-border-soft;
+    -fx-border-width: 1;
+    -fx-text-fill: -c-ghost-text;
 }
 .btn-quit:hover {
-    -fx-background-color: #ee3333;
+    -fx-background-color: -c-ghost-hover-bg;
+    -fx-border-color: -c-accent;
+    -fx-text-fill: -c-accent;
 }
 
-/* Save - dark gray */
-.btn-save {
-    -fx-background-color: #505060;
-}
-.btn-save:hover {
-    -fx-background-color: #606075;
-}
-
-/* Load - dark gray */
-.btn-load {
-    -fx-background-color: #505060;
-}
-.btn-load:hover {
-    -fx-background-color: #606075;
-}
-
-/* --- Title Label (GOMOKU) --- */
-.title-label {
-    -fx-font-size: 26px;
+/* --- Theme picker drop-down (toolbar + launcher) --- */
+.theme-combo {
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-text-fill: #FFD700;
+    -fx-min-height: 34;
+    -fx-pref-width: 150;
+    -fx-cursor: hand;
+}
+
+/* --- Title Label (GOMOKU in toolbar) --- */
+.title-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: -c-accent;
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 18, 0.25, 0, 0);
 }
 
 /* --- Sidebar --- */
 .sidebar {
-    -fx-background-color: #22223a;
+    -fx-background-color: linear-gradient(to bottom, -c-panel-top, -c-panel-bottom);
     -fx-padding: 15;
-    -fx-spacing: 15;
+    -fx-spacing: 14;
     -fx-pref-width: 260;
-    -fx-border-color: #2a2a3a transparent transparent transparent;
+    -fx-border-color: transparent transparent transparent -c-border;
     -fx-border-width: 0 0 0 1;
 }
 
+/* --- Center board wrapper --- */
+.board-wrap {
+    -fx-background-color: -c-board-wrap;
+}
+
+/* --- Turn badge ("X to move") --- */
+.turn-badge {
+    -fx-background-color: -c-card;
+    -fx-background-radius: 10;
+    -fx-border-color: -c-border;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 11 14 11 14;
+}
+.turn-badge:red-turn {
+    -fx-background-color: -c-accent-tint;
+    -fx-border-color: -c-accent;
+}
+.turn-badge-text {
+    -fx-text-fill: -c-value;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* --- Move history list --- */
+.move-list {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: -c-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 0;
+    -fx-pref-height: 120;
+}
+.move-list .viewport { -fx-background-color: transparent; }
+.move-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -c-value;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 11px;
+    -fx-padding: 3 6 3 6;
+}
+.move-list .list-cell:filled:hover { -fx-background-color: -c-ghost-hover-bg; }
+.move-list .list-cell:filled:selected { -fx-background-color: -c-accent-tint; -fx-text-fill: -c-value; }
+
 /* --- Card Panel --- */
 .card-panel {
-    -fx-background-color: #2c2c46;
-    -fx-background-radius: 8;
-    -fx-border-color: #3c3c5a;
-    -fx-border-radius: 8;
+    -fx-background-color: -c-card;
+    -fx-background-radius: 10;
+    -fx-border-color: -c-border;
+    -fx-border-radius: 10;
     -fx-border-width: 1;
-    -fx-padding: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+    -fx-padding: 11;
 }
+.card-panel:hover { -fx-border-color: -c-border-hover; }
 
-/* --- Card Title --- */
 .card-title {
-    -fx-font-size: 15px;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-text-fill: #c0c0e0;
-    -fx-padding: 0 0 6 0;
+    -fx-text-fill: -c-muted;
+    -fx-padding: 0 0 4 0;
 }
-
-/* --- Card Key Labels --- */
 .card-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #9898b4;
+    -fx-font-size: 11px;
+    -fx-text-fill: -c-dim;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
 }
-
-/* --- Card Value Labels --- */
 .card-value {
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-text-fill: #e8e8ff;
+    -fx-text-fill: -c-value;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
 }
 
 /* --- Status Bar --- */
 .status-bar {
-    -fx-background-color: #14141c;
+    -fx-background-color: -c-toolbar-bg;
     -fx-padding: 5 12 5 12;
-    -fx-border-color: #2a2a3a transparent transparent transparent;
+    -fx-border-color: -c-border transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
 }
 .status-text {
-    -fx-font-size: 12px;
-    -fx-text-fill: #8888a8;
-}
-
-/* --- ComboBox in launcher --- */
-.combo-box {
-    -fx-background-color: #2a2a44;
-    -fx-border-color: #3c3c5c;
-    -fx-border-radius: 4;
-    -fx-background-radius: 4;
-    -fx-font-size: 14px;
-}
-.combo-box .list-cell {
-    -fx-text-fill: #d0d0e0;
-    -fx-background-color: #2a2a44;
-    -fx-font-size: 14px;
-}
-.combo-box-popup .list-view {
-    -fx-background-color: #2a2a44;
-}
-.combo-box-popup .list-view .list-cell {
-    -fx-background-color: #2a2a44;
-    -fx-text-fill: #d0d0e0;
-}
-.combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #3a3a5a;
-}
-.combo-box-popup .list-view .list-cell:filled:selected {
-    -fx-background-color: #4a4a6a;
-    -fx-text-fill: white;
-}
-
-/* --- CheckBox --- */
-.check-box {
-    -fx-text-fill: #c8c8dc;
-    -fx-font-size: 14px;
-}
-.check-box .box {
-    -fx-background-color: #2a2a44;
-    -fx-border-color: #4a4a6a;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
-}
-.check-box:selected .box {
-    -fx-background-color: #0066cc;
-}
-
-/* --- Alert dialogs --- */
-.dialog-pane {
-    -fx-background-color: #22223a;
-}
-.dialog-pane .content {
-    -fx-text-fill: #d0d0e0;
-}
-.dialog-pane .header-panel {
-    -fx-background-color: #1a1a2e;
-}
-
-/* ===== Modern Start Screen ===== */
-
-.gomoku-start-root {
-    -fx-background-color: #0b1016;
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-}
-
-/* Gold radial glow at top, matching HTML reference background */
-.gomoku-start-stage {
-    -fx-background-color:
-        radial-gradient(center 50% 0%, radius 55%, rgba(245,166,35,0.12), transparent),
-        linear-gradient(to bottom, #0f1419, #0b1016);
-}
-
-.hero-column {
-    -fx-padding: 8 0 0 0;
-}
-
-.launcher-eyebrow {
-    -fx-text-fill: #8b98a8;
     -fx-font-size: 10px;
+    -fx-text-fill: -c-dim2;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-weight: bold;
 }
 
-/* GOMOKU — red title with subtle glow */
-.launcher-title {
-    -fx-text-fill: #ef4444;
-    -fx-font-size: 58px;
-    -fx-font-weight: 900;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.55), 18, 0.25, 0, 0);
+/* --- ComboBox --- */
+.combo-box {
+    -fx-background-color: -c-combo-bg;
+    -fx-border-color: -c-combo-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+}
+.combo-box .list-cell {
+    -fx-text-fill: -c-text;
+    -fx-background-color: transparent;
+    -fx-font-size: 12px;
+    -fx-padding: 3 8 3 8;
+}
+.combo-box .arrow, .combo-box .arrow-button { -fx-background-color: -c-muted; }
+.combo-box-popup .list-view {
+    -fx-background-color: -c-combo-bg;
+    -fx-border-color: -c-border;
+}
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: -c-combo-bg;
+    -fx-text-fill: -c-text;
+}
+.combo-box-popup .list-view .list-cell:hover { -fx-background-color: -c-ghost-hover-bg; }
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: -c-accent;
+    -fx-text-fill: white;
 }
 
+/* --- CheckBox --- */
+.check-box { -fx-text-fill: -c-text; -fx-font-size: 14px; }
+.check-box .box {
+    -fx-background-color: -c-combo-bg;
+    -fx-border-color: -c-combo-border;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+.check-box:selected .box { -fx-background-color: -c-accent; }
+
+/* --- Alert dialogs --- */
+.dialog-pane { -fx-background-color: -c-dialog-bg; }
+.dialog-pane .content { -fx-text-fill: -c-text; }
+.dialog-pane .label { -fx-text-fill: -c-text; }
+.dialog-pane .header-panel { -fx-background-color: -c-dialog-header; }
+.dialog-pane .header-panel .label { -fx-text-fill: -c-value; }
+
+/* ===== Start Screen ===== */
+.gomoku-start-root {
+    -fx-background-color: -c-bg-bottom;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+.gomoku-start-stage {
+    -fx-background-color:
+        radial-gradient(center 50% 0%, radius 55%, -c-glow, transparent),
+        linear-gradient(to bottom, -c-bg-top, -c-bg-bottom);
+}
+.hero-column { -fx-padding: 8 0 0 0; }
+
+.launcher-eyebrow {
+    -fx-text-fill: -c-muted;
+    -fx-font-size: 10px;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-weight: bold;
+}
+.launcher-title {
+    -fx-text-fill: -c-accent;
+    -fx-font-size: 58px;
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 18, 0.25, 0, 0);
+}
 .launcher-subtitle {
-    -fx-text-fill: #9aa6b4;
+    -fx-text-fill: -c-muted;
     -fx-font-size: 14px;
     -fx-line-spacing: 4;
     -fx-max-width: 360;
 }
 
-.vs-preview-card,
-.settings-panel {
-    -fx-background-color: linear-gradient(to bottom, rgba(26,34,44,0.96), rgba(14,20,27,0.96));
+.vs-preview-card, .settings-panel {
+    -fx-background-color: linear-gradient(to bottom, -c-panel-top, -c-panel-bottom);
     -fx-background-radius: 14;
-    -fx-border-color: #263140;
+    -fx-border-color: -c-border;
     -fx-border-radius: 14;
     -fx-border-width: 1;
     -fx-padding: 14;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 22, 0, 0, 10);
 }
 
-.preview-side-card {
-    -fx-background-radius: 10;
-    -fx-padding: 12 6 12 6;
-}
-
-.preview-side-card:hover {
-    -fx-background-color: rgba(255,255,255,0.035);
-}
+.preview-side-card { -fx-background-radius: 10; -fx-padding: 12 6 12 6; }
+.preview-side-card:hover { -fx-background-color: rgba(127,127,127,0.06); }
 
 .preview-stone {
-    -fx-min-width: 58;
-    -fx-min-height: 58;
-    -fx-max-width: 58;
-    -fx-max-height: 58;
-    -fx-background-radius: 30;
-    -fx-border-radius: 30;
-    -fx-border-width: 2;
+    -fx-min-width: 58; -fx-min-height: 58; -fx-max-width: 58; -fx-max-height: 58;
+    -fx-background-radius: 30; -fx-border-radius: 30; -fx-border-width: 2;
 }
-
 .preview-stone.black {
     -fx-background-color: radial-gradient(center 35% 30%, radius 70%, #5a6172, #15181d 58%, #000000);
     -fx-border-color: #0a0d11;
 }
-
 .preview-stone.red {
     -fx-background-color: radial-gradient(center 35% 30%, radius 70%, #ff8a70, #d02a1a 58%, #5a0f0a);
     -fx-border-color: #7a1a10;
 }
 
 .preview-side {
-    -fx-text-fill: #8b98a8;
+    -fx-text-fill: -c-muted;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 9px;
     -fx-font-weight: bold;
 }
-
-.preview-name {
-    -fx-text-fill: #e6edf3;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
-
+.preview-name { -fx-text-fill: -c-value; -fx-font-size: 13px; -fx-font-weight: bold; }
 .preview-strategy {
-    -fx-text-fill: #ef4444;
+    -fx-text-fill: -c-accent;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
 }
-
 .vs-separator {
-    -fx-text-fill: #ef4444;
+    -fx-text-fill: -c-accent;
     -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-font-style: italic;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.40), 14, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 14, 0, 0, 0);
 }
-
 .launcher-footer-summary {
-    -fx-text-fill: #5f6d7c;
+    -fx-text-fill: -c-dim2;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
 }
 
-.settings-panel {
-    -fx-padding: 16;
-}
-
+.settings-panel { -fx-padding: 16; }
 .settings-heading {
-    -fx-text-fill: #8b98a8;
+    -fx-text-fill: -c-muted;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-letter-spacing: 0.18em;
 }
-
 .settings-card {
-    -fx-background-color: #0e141b;
+    -fx-background-color: -c-card;
     -fx-background-radius: 10;
-    -fx-border-color: #263140;
+    -fx-border-color: -c-border;
     -fx-border-radius: 10;
     -fx-border-width: 1;
     -fx-padding: 11;
 }
+.settings-card:hover { -fx-border-color: -c-border-hover; }
+.settings-card:disabled { -fx-opacity: 0.42; }
 
-.settings-card:hover {
-    -fx-border-color: #334257;
-}
-
-.settings-card:disabled {
-    -fx-opacity: 0.42;
-}
-
-.field-title {
-    -fx-text-fill: #8b98a8;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
-}
-
+.field-title { -fx-text-fill: -c-muted; -fx-font-size: 10px; -fx-font-weight: bold; }
 .field-hint {
-    -fx-text-fill: #5a6776;
+    -fx-text-fill: -c-dim;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 10px;
 }
 
+/* Board-size button graphic labels */
+.size-num {
+    -fx-text-fill: -c-value;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+.size-name { -fx-text-fill: -c-dim; -fx-font-size: 8px; -fx-font-weight: bold; }
+
 .launcher-toggle {
-    -fx-background-color: #141c26;
+    -fx-background-color: -c-toggle-bg;
     -fx-background-radius: 8;
-    -fx-border-color: #263140;
+    -fx-border-color: -c-border;
     -fx-border-radius: 8;
     -fx-border-width: 1;
-    -fx-text-fill: #aab5c2;
+    -fx-text-fill: -c-ghost-text;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-padding: 9 7 9 7;
@@ -379,78 +514,45 @@
     -fx-text-alignment: center;
     -fx-alignment: center;
 }
-
-.launcher-toggle:hover {
-    -fx-border-color: #3a4a5e;
-    -fx-text-fill: #ffffff;
-}
-
-/* Crimson selected state */
+.launcher-toggle:hover { -fx-border-color: -c-border-soft-hover; -fx-text-fill: -c-ghost-hover-text; }
 .launcher-toggle:selected {
-    -fx-background-color: linear-gradient(to bottom, rgba(239,68,68,0.18), rgba(239,68,68,0.05));
-    -fx-border-color: #ef4444;
-    -fx-text-fill: #ffb4a6;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.18), 14, 0.25, 0, 0);
+    -fx-background-color: linear-gradient(to bottom, -c-accent-tint, -c-accent-tint-soft);
+    -fx-border-color: -c-accent;
+    -fx-text-fill: -c-toggle-sel-text;
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 14, 0.25, 0, 0);
 }
+.launcher-toggle:disabled { -fx-opacity: 0.58; }
 
-.launcher-toggle:disabled {
-    -fx-opacity: 0.58;
-}
-
-.strategy-toggle {
-    -fx-font-size: 10px;
-    -fx-padding: 8 5 8 5;
-}
-
-.size-toggle {
-    -fx-padding: 8 4 8 4;
-}
+.strategy-toggle { -fx-font-size: 10px; -fx-padding: 8 5 8 5; }
+.size-toggle { -fx-padding: 8 4 8 4; }
 
 .depth-value {
-    -fx-text-fill: #ef4444;
+    -fx-text-fill: -c-accent;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
-
-.depth-slider .track {
-    -fx-background-color: #263140;
-    -fx-background-radius: 4;
-    -fx-pref-height: 4;
-}
-
+.depth-slider .track { -fx-background-color: -c-border; -fx-background-radius: 4; -fx-pref-height: 4; }
 .depth-slider .thumb {
-    -fx-background-color: #ef4444;
+    -fx-background-color: -c-accent;
     -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.65), 12, 0.2, 0, 0);
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 12, 0.2, 0, 0);
 }
-
-.depth-slider .axis {
-    -fx-tick-label-fill: #5a6776;
-}
+.depth-slider .axis { -fx-tick-label-fill: -c-dim; }
 
 .meta-row {
     -fx-padding: 12 0 0 0;
-    -fx-border-color: #263140 transparent transparent transparent;
+    -fx-border-color: -c-border transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
 }
-
-.meta-row .check-box {
-    -fx-text-fill: #9aa6b4;
-    -fx-font-size: 12px;
-}
-
+.meta-row .check-box { -fx-text-fill: -c-muted; -fx-font-size: 12px; }
 .meta-row .check-box .box {
-    -fx-background-color: #263140;
-    -fx-border-color: #38475a;
+    -fx-background-color: -c-border;
+    -fx-border-color: -c-border-soft-hover;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
 }
-
-.meta-row .check-box:selected .box {
-    -fx-background-color: #ef4444;
-    -fx-border-color: #ef4444;
-}
+.meta-row .check-box:selected .box { -fx-background-color: -c-accent; -fx-border-color: -c-accent; }
 
 .launcher-button {
     -fx-min-height: 44;
@@ -461,29 +563,49 @@
     -fx-cursor: hand;
     -fx-padding: 0 22 0 22;
 }
-
-/* Crimson primary button */
 .launcher-button.primary {
-    -fx-background-color: linear-gradient(to bottom, #ef4444, #b02e2e);
+    -fx-background-color: linear-gradient(to bottom, -c-accent, -c-accent-deep);
     -fx-text-fill: #ffffff;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.35), 20, 0.2, 0, 6);
+    -fx-effect: dropshadow(gaussian, -c-accent-glow, 20, 0.2, 0, 6);
 }
-
 .launcher-button.primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #f87171, #c43a3a);
+    -fx-background-color: linear-gradient(to bottom, -c-accent-bright, -c-accent-bright2);
 }
-
 .launcher-button.primary:pressed {
-    -fx-background-color: linear-gradient(to bottom, #b02e2e, #8b1a1a);
+    -fx-background-color: linear-gradient(to bottom, -c-accent-deep, -c-accent-deep2);
 }
-
 .launcher-button.ghost {
     -fx-background-color: transparent;
-    -fx-border-color: #2a3544;
-    -fx-text-fill: #c3ccd7;
+    -fx-border-color: -c-border-soft;
+    -fx-text-fill: -c-ghost-text;
 }
+.launcher-button.ghost:hover { -fx-background-color: -c-ghost-hover-bg; -fx-text-fill: -c-ghost-hover-text; }
 
-.launcher-button.ghost:hover {
-    -fx-background-color: #1a222c;
-    -fx-text-fill: #ffffff;
+/* ============================================================
+   THEME CHARACTER OVERRIDES
+   ============================================================ */
+
+/* Neo-Brutalist: thick borders + hard offset shadows, no glow */
+.theme-brutalist .launcher-button.primary,
+.theme-brutalist .btn-restart,
+.theme-brutalist .btn-save {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,1), 0, 1, 4, 4);
+    -fx-border-color: #111111;
+    -fx-border-width: 2;
 }
+.theme-brutalist .settings-panel,
+.theme-brutalist .vs-preview-card,
+.theme-brutalist .settings-card,
+.theme-brutalist .card-panel,
+.theme-brutalist .turn-badge {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,1), 0, 1, 4, 4);
+    -fx-border-width: 2;
+}
+.theme-brutalist .launcher-title,
+.theme-brutalist .title-label,
+.theme-brutalist .vs-separator { -fx-effect: null; }
+
+/* Neon Grid: dark text on the bright cyan primary buttons for legibility */
+.theme-neon .launcher-button.primary,
+.theme-neon .btn-restart,
+.theme-neon .btn-save { -fx-text-fill: #042028; }

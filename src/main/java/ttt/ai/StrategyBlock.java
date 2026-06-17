@@ -1,20 +1,39 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package ttt.ai;
 
 import ttt.model.IGame;
 
 import java.util.List;
 
+/**
+ * One-ply tactical strategy: take an immediate win, otherwise block the
+ * opponent's immediate win, otherwise play randomly.
+ *
+ * <p>Looks only a single move ahead (no depth search). Stronger than
+ * {@link StrategyRandom} but easily out-played by the search-based strategies.
+ *
+ * @param <M> the move type
+ */
 public class StrategyBlock<M> implements IGameKI<M> {
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Applies the move selected by {@link #bestMove(IGame)}, or returns the
+     * game unchanged if no move is available (e.g. the board is full).
+     */
     @Override
     public IGame<M> doBestMove(IGame<M> game) {
-        return game.doMove(bestMove(game));
+        M move = bestMove(game);
+        if (move == null) return game;
+        return game.doMove(move);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Selection order: (1) a move that wins immediately, (2) a move that
+     * blocks the opponent's immediate win, (3) a random move.
+     */
     @Override
     public M bestMove(IGame<M> game) {
         byte me = game.currentPlayer();
@@ -41,4 +60,3 @@ public class StrategyBlock<M> implements IGameKI<M> {
         return new StrategyRandom<M>().bestMove(game);
     }
 }
-

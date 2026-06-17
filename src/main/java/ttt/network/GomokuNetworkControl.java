@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package ttt.network;
 
 import ttt.model.IRegularGame;
@@ -69,11 +65,9 @@ public class GomokuNetworkControl<M> extends StackPane {
             myTurn = false; // Client (Red/P2) waits
         }
 
-        /**
-         * Background thread: listens for opponent's moves from the network.
-         * On receiving a move, updates the board and turn using
-         * Platform.runLater to ensure thread-safe UI updates.
-         */
+        // Background thread: listens for opponent's moves from the network.
+        // On receiving a move, updates the board and turn using
+        // Platform.runLater to ensure thread-safe UI updates.
         new Thread(() -> {
             try {
                 while (true) {
@@ -101,7 +95,12 @@ public class GomokuNetworkControl<M> extends StackPane {
     }
 
     /**
-     * Called when a move is made locally. Subclasses or external code should call this.
+     * Applies a move made by the local player: updates the board, sends the move
+     * to the peer, and passes the turn. Ignored if it is not this player's turn,
+     * the game is over, or the target cell is off-board or already occupied.
+     *
+     * @param r the row of the move (0-indexed)
+     * @param c the column of the move (0-indexed)
      */
     public void makeLocalMove(int r, int c) {
         if (!myTurn || game.endedGame()) return;

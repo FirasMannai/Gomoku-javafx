@@ -1,9 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-
 package ttt.ai;
 
 import ttt.model.ARegularGame;
@@ -23,12 +17,20 @@ import java.util.*;
  * @param <M> The move type for the game.
  */
 public class StrategyAlphaBeta<M> implements IGameKI<M> {
+
+    /** Maximum search depth (in plies); at least 1. */
     private final int maxDepth;
 
+    /** Creates an Alpha-Beta strategy with the default search depth of 4. */
     public StrategyAlphaBeta() {
         this(4);
     }
 
+    /**
+     * Creates an Alpha-Beta strategy with a custom search depth.
+     *
+     * @param maxDepth maximum search depth in plies; values below 1 are clamped to 1
+     */
     public StrategyAlphaBeta(int maxDepth) {
         this.maxDepth = Math.max(1, maxDepth);
     }

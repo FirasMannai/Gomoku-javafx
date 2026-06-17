@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package ttt.ai;
 
 import ttt.model.IGame;
@@ -18,12 +13,20 @@ import java.util.List;
  * @param <M> The move type for the game.
  */
 public class StrategyMinimax<M> implements IGameKI<M> {
+
+    /** Maximum search depth (in plies); at least 1. */
     private final int depth;
 
+    /** Creates a Minimax strategy with the default search depth of 3. */
     public StrategyMinimax() {
         this(3);
     }
 
+    /**
+     * Creates a Minimax strategy with a custom search depth.
+     *
+     * @param depth maximum search depth in plies; values below 1 are clamped to 1
+     */
     public StrategyMinimax(int depth) {
         this.depth = Math.max(1, depth);
     }

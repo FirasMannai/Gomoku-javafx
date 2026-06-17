@@ -10,6 +10,7 @@ import ttt.ai.StrategyAlphaBeta;
 import ttt.network.GomokuNetwork;
 import ttt.view.GomokuGameView;
 import ttt.view.GomokuBoardFX;
+import ttt.view.ThemeManager;
 import ttt.storage.XMLGameStorage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -17,6 +18,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -42,32 +44,65 @@ import java.util.Optional;
  * <li>Updates GomokuGameView labels and GomokuBoardFX rendering</li>
  * </ul>
  * <p>
- * No game logic is duplicated â€” only reused from existing classes.
+ * No game logic is duplicated - only reused from existing classes.
  */
 public class GomokuControllerFX {
 
+    /** The primary application stage, reused for scene switching. */
     private final Stage stage;
+
+    /** Game mode: {@code "PP"} (Player vs Player), {@code "PC"} (Player vs AI),
+     *  {@code "CC"} (AI vs AI), or {@code "PN"} (network). */
     private final String mode;
+
+    /** AI strategy used for the computer player in PC mode and Player 1 (Black) in CC mode. Null for human sides. */
     private final IGameKI<Pair<Byte, Byte>> ai1;
+
+    /** AI strategy for Player 2 (Red) in CC mode. Null in PP and PC modes. */
     private final IGameKI<Pair<Byte, Byte>> ai2;
+
+    /** Dedicated AlphaBeta instance used only for hint computation on a cloned state. */
     private final IGameKI<Pair<Byte, Byte>> hintAI = new StrategyAlphaBeta<>();
 
+    /** The live game state; replaced (not mutated) on every move. */
     private IRegularGame<Pair<Byte, Byte>> currentGame;
+
+    /** Undo history — each entry is a cloned snapshot. Used only in PC mode. */
     private final List<IRegularGame<Pair<Byte, Byte>>> history = new ArrayList<>();
 
+    /** The main game layout managed by this controller. */
     private GomokuGameView view;
+
+    /** The board canvas managed by this controller. */
     private GomokuBoardFX boardFX;
 
+    /** Running win counters shown in the sidebar score cards. */
     private int blackWins = 0;
     private int whiteWins = 0;
 
+    /** Last hint move to highlight on the board; null when no hint is active. */
     private Pair<Byte, Byte> hintMove;
+
+    /** Timeline driving CC auto-play; null in all other modes. */
     private Timeline ccTimeline;
 
+    /** Active network connection for PN mode; null otherwise. */
     private GomokuNetwork net;
+
+    /** True when it is this client's turn in a PN game. Volatile for cross-thread visibility. */
     private volatile boolean isMyNetworkTurn;
 
+    /** Nanosecond timestamp of the start of the current human player's turn, used to display thinking time. */
     private long playerMoveStartNanos = System.nanoTime();
+
+    /** Total number of stones placed so far this game (shown in the sidebar and history). */
+    private int moveCount = 0;
+
+    /** Nanosecond timestamp marking when the current game began, used for the elapsed clock. */
+    private long gameStartNanos = System.nanoTime();
+
+    /** One-second ticking timeline that refreshes the elapsed-time readout. */
+    private Timeline elapsedTimeline;
 
     /**
      * Constructs the controller, creates the board and view, and switches
@@ -104,12 +139,27 @@ public class GomokuControllerFX {
             Debugger.printMoveHeader();
         }
 
-        // Show the game scene
-        Scene gameScene = new Scene(view, 1060, 730);
+        // Preserve stage size/maximized state across scene switch.
+        // Passing explicit width/height to new Scene() forces JavaFX to resize
+        // the stage to those values, which un-maximizes it — so we use no-arg
+        // Scene constructor and restore the previous dimensions ourselves.
+        boolean wasMaximized = stage.isMaximized();
+        double prevW = Double.isNaN(stage.getWidth())  || stage.getWidth()  <= 0 ? 1100 : stage.getWidth();
+        double prevH = Double.isNaN(stage.getHeight()) || stage.getHeight() <= 0 ? 700  : stage.getHeight();
+
+        Scene gameScene = new Scene(view);
         gameScene.getStylesheets().add(getClass().getResource("/ttt/view/style.css").toExternalForm());
+        ThemeManager.getInstance().register(view);
+        installShortcuts(gameScene);
         stage.setScene(gameScene);
-        stage.setMinWidth(900);
-        stage.setMinHeight(650);
+        stage.setMinWidth(940);
+        stage.setMinHeight(620);
+        if (wasMaximized) {
+            stage.setMaximized(true);
+        } else {
+            stage.setWidth(Math.max(1100, prevW));
+            stage.setHeight(Math.max(700, prevH));
+        }
 
         updateUI();
 
@@ -119,6 +169,7 @@ public class GomokuControllerFX {
         }
 
         playerMoveStartNanos = System.nanoTime();
+        startElapsedTimer();
     }
 
     // ==================== GETTERS ====================
@@ -189,7 +240,7 @@ public class GomokuControllerFX {
             IRegularGame<Pair<Byte, Byte>> next = g.setAtPosition(row, col);
             currentGame = next;
             boardFX.setGame(currentGame);
-            view.setLastMove((row + 1) + "," + (col + 1));
+            recordMove(currentPlayer, row, col);
 
             if ("PC".equals(mode))
                 addToHistory(next);
@@ -235,14 +286,14 @@ public class GomokuControllerFX {
 
         byte aiPlayer = before.currentPlayer();
         Pair<Byte, Byte> move = findLastMove(before, after, aiPlayer);
-        if (move != null) {
-            if (Debugger.isDebug())
-                Debugger.log(aiPlayer, move.first, move.second);
-            view.setLastMove((move.first + 1) + "," + (move.second + 1));
-        }
 
         currentGame = after;
         boardFX.setGame(currentGame);
+        if (move != null) {
+            if (Debugger.isDebug())
+                Debugger.log(aiPlayer, move.first, move.second);
+            recordMove(aiPlayer, move.first, move.second);
+        }
         addToHistory(after);
         updateUI();
 
@@ -278,14 +329,14 @@ public class GomokuControllerFX {
 
                 byte aiPlayer = before.currentPlayer();
                 Pair<Byte, Byte> move = findLastMove(before, after, aiPlayer);
-                if (move != null) {
-                    if (Debugger.isDebug())
-                        Debugger.log(aiPlayer, move.first, move.second);
-                    view.setLastMove((move.first + 1) + "," + (move.second + 1));
-                }
 
                 currentGame = after;
                 boardFX.setGame(currentGame);
+                if (move != null) {
+                    if (Debugger.isDebug())
+                        Debugger.log(aiPlayer, move.first, move.second);
+                    recordMove(aiPlayer, move.first, move.second);
+                }
                 updateUI();
 
                 if (currentGame.endedGame()) {
@@ -323,6 +374,7 @@ public class GomokuControllerFX {
             Debugger.printMoveHeader();
 
         clearHint();
+        resetTracking();
         view.setLastMove("-");
         view.setAIThinkTime("-");
         view.setPlayerTime("-");
@@ -433,6 +485,9 @@ public class GomokuControllerFX {
                 history.add(cloneGame(loaded));
             }
 
+            resetTracking();
+            moveCount = countStones(currentGame);
+            view.setMoveCount(moveCount);
             view.setStatus("\uD83D\uDCC2 Game loaded from savedgame.xml");
             view.setLastMove("-");
             updateUI();
@@ -457,6 +512,10 @@ public class GomokuControllerFX {
         startNetworkListener();
     }
 
+    /**
+     * Starts a daemon thread that blocks on {@link GomokuNetwork#receiveMove()} and
+     * dispatches each incoming move to the JavaFX thread via {@code Platform.runLater}.
+     */
     private void startNetworkListener() {
         Thread t = new Thread(() -> {
             try {
@@ -472,11 +531,19 @@ public class GomokuControllerFX {
         t.start();
     }
 
+    /**
+     * Applies an opponent's move received over the network and updates the UI.
+     * Must be called on the JavaFX Application Thread.
+     *
+     * @param row Board row of the opponent's move (0-indexed).
+     * @param col Board column of the opponent's move (0-indexed).
+     */
     private void applyNetworkMove(int row, int col) {
         if (currentGame.endedGame()) return;
+        byte mover = currentGame.currentPlayer();
         currentGame = currentGame.setAtPosition((byte) row, (byte) col);
         boardFX.setGame(currentGame);
-        view.setLastMove((row + 1) + "," + (col + 1));
+        recordMove(mover, (byte) row, (byte) col);
         updateUI();
         isMyNetworkTurn = true;
         if (currentGame.endedGame())
@@ -491,10 +558,46 @@ public class GomokuControllerFX {
     public void quitToLauncher() {
         if (ccTimeline != null)
             ccTimeline.stop();
+        if (elapsedTimeline != null)
+            elapsedTimeline.stop();
         if (net != null) {
             try { net.close(); } catch (IOException ignored) {}
         }
         GomokuFXApp.showLauncher(stage);
+    }
+
+    /**
+     * Installs in-game keyboard shortcuts on the game scene:
+     * <ul>
+     *   <li><b>R</b> — restart</li>
+     *   <li><b>H</b> — hint</li>
+     *   <li><b>Ctrl+Z</b> — undo</li>
+     *   <li><b>Ctrl+S</b> — save</li>
+     *   <li><b>Ctrl+L</b> — load</li>
+     *   <li><b>T</b> — toggle light/dark theme</li>
+     *   <li><b>Esc</b> — quit to launcher</li>
+     * </ul>
+     *
+     * @param scene the game scene to attach the key handler to
+     */
+    private void installShortcuts(Scene scene) {
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.isControlDown()) {
+                switch (event.getCode()) {
+                    case Z: undoTwoMoves(); event.consume(); return;
+                    case S: saveGame();     event.consume(); return;
+                    case L: loadGame();     event.consume(); return;
+                    default: return;
+                }
+            }
+            switch (event.getCode()) {
+                case R:      restartGame();     event.consume(); break;
+                case H:      computeHint();     event.consume(); break;
+                case T:      ThemeManager.getInstance().cycle(); event.consume(); break;
+                case ESCAPE: quitToLauncher();  event.consume(); break;
+                default: break;
+            }
+        });
     }
 
     // ==================== UI UPDATE ====================
@@ -506,7 +609,7 @@ public class GomokuControllerFX {
         if (currentGame != null) {
             byte cur = currentGame.currentPlayer();
             boolean isP1 = (cur == currentGame.getPlayer1());
-            view.setTurnText(isP1 ? "\u26AB Black" : "\uD83D\uDD34 Red");
+            view.setTurn(isP1);
         }
         view.setBlackScore(String.valueOf(blackWins));
         view.setRedScore(String.valueOf(whiteWins));
@@ -532,9 +635,13 @@ public class GomokuControllerFX {
         updateUI();
         boardFX.redraw();
 
+        if (elapsedTimeline != null)
+            elapsedTimeline.stop();
+
         String msg = currentGame.wins(currentGame.getPlayer1()) ? "\u26AB Black wins!"
                 : currentGame.wins(currentGame.getPlayer2()) ? "\uD83D\uDD34 Red wins!"
                         : "Draw!";
+        view.setTurnResult(msg);
 
         // Debugger logging (same logic as existing GomokuControl)
         if (Debugger.isDebug()) {
@@ -590,8 +697,81 @@ public class GomokuControllerFX {
     }
 
     /**
-     * Finds the move that was made between two game states by comparing boards.
-     * Reuses the same difference-detection logic as the existing GomokuControl.
+     * Records a single placed stone: bumps the move counter, updates the "last
+     * move" readout, appends to the sidebar history list, and marks the stone as
+     * the most recent one on the board.
+     *
+     * @param player the player who placed the stone
+     * @param row    board row (0-indexed)
+     * @param col    board column (0-indexed)
+     */
+    private void recordMove(byte player, byte row, byte col) {
+        moveCount++;
+        boolean isBlack = player == currentGame.getPlayer1();
+        String coord = coordLabel(row, col);
+        view.setLastMove(coord);
+        view.setMoveCount(moveCount);
+        view.addMove(moveCount, isBlack, coord);
+        boardFX.setLastMove(new Pair<>(row, col));
+    }
+
+    /** Formats a board position as a chess-style coordinate, e.g. (7,7) → "H8". */
+    private String coordLabel(int row, int col) {
+        char file = (char) ('A' + col);
+        return "" + file + (row + 1);
+    }
+
+    /** Counts the stones currently on the board (used to seed the move counter after a load). */
+    private int countStones(IRegularGame<Pair<Byte, Byte>> g) {
+        int count = 0;
+        for (byte r = 0; r < g.getRows(); r++) {
+            for (byte c = 0; c < g.getCols(); c++) {
+                if (g.getAtPosition(r, c) != g.getPlayerNone()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Resets per-game tracking (move counter, history list, last-move marker) and
+     * restarts the elapsed clock. Called when a new board begins.
+     */
+    private void resetTracking() {
+        moveCount = 0;
+        view.setMoveCount(0);
+        view.clearHistory();
+        view.setElapsed("00:00");
+        boardFX.setLastMove(null);
+        startElapsedTimer();
+    }
+
+    /** (Re)starts the one-second elapsed-time clock from now. */
+    private void startElapsedTimer() {
+        gameStartNanos = System.nanoTime();
+        if (elapsedTimeline == null) {
+            elapsedTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateElapsed()));
+            elapsedTimeline.setCycleCount(Timeline.INDEFINITE);
+        }
+        elapsedTimeline.playFromStart();
+        updateElapsed();
+    }
+
+    /** Pushes the current elapsed time (MM:SS) to the sidebar. */
+    private void updateElapsed() {
+        long secs = (System.nanoTime() - gameStartNanos) / 1_000_000_000L;
+        view.setElapsed(String.format("%02d:%02d", secs / 60, secs % 60));
+    }
+
+    /**
+     * Finds the move made between two game states by scanning for a cell that
+     * changed from non-{@code player} to {@code player}.
+     *
+     * @param before Game state before the move.
+     * @param after  Game state after the move.
+     * @param player The player whose stone was just placed.
+     * @return The (row, col) of the new stone, or {@code null} if not found.
      */
     private Pair<Byte, Byte> findLastMove(IRegularGame<Pair<Byte, Byte>> before,
             IRegularGame<Pair<Byte, Byte>> after,
@@ -608,8 +788,11 @@ public class GomokuControllerFX {
     }
 
     /**
-     * Clones a game state using reflection (same approach as existing
-     * GomokuControl.cloneGame).
+     * Deep-clones a game state by invoking its {@code clone()} method via reflection.
+     *
+     * @param game The game state to clone.
+     * @return A deep copy of {@code game}.
+     * @throws RuntimeException if cloning fails.
      */
     @SuppressWarnings("unchecked")
     private IRegularGame<Pair<Byte, Byte>> cloneGame(
@@ -630,6 +813,12 @@ public class GomokuControllerFX {
             history.remove(0);
     }
 
+    /**
+     * Displays a modal information dialog and waits for the user to dismiss it.
+     *
+     * @param title   The dialog window title.
+     * @param content The message body shown inside the dialog.
+     */
     private void showInfoAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, content, ButtonType.OK);
         alert.setTitle(title);
@@ -637,6 +826,11 @@ public class GomokuControllerFX {
         alert.showAndWait();
     }
 
+    /**
+     * Displays a modal error dialog and waits for the user to dismiss it.
+     *
+     * @param content The error message shown inside the dialog.
+     */
     private void showErrorAlert(String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR, content, ButtonType.OK);
         alert.setTitle("Error");

@@ -33,6 +33,8 @@ Gomoku FX follows a full **MVC (Model-View-Controller)** pattern with dedicated 
 │                      View (ttt.view)                         │
 │   GomokuLauncherFX  ──  GomokuGameView  ──  GomokuBoardFX    │
 │   (start screen)        (layout/labels)    (canvas/input)    │
+│                     ThemeManager + style.css                 │
+│                  (7 switchable light/dark themes)            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +48,7 @@ Gomoku FX follows a full **MVC (Model-View-Controller)** pattern with dedicated 
 | `ttt.util` | Utilities | `Debugger` |
 | `ttt.network` | Networking (SERVER/CLIENT modes) | `GomokuNetwork`, `GomokuNetworkControl` |
 | `ttt.controller` | MVC Controller | `GomokuFXApp`, `GomokuMain`, `GomokuLauncherController`, `GomokuControllerFX` |
-| `ttt.view` | MVC View | `GomokuLauncherFX`, `GomokuGameView`, `GomokuBoardFX` |
+| `ttt.view` | MVC View | `GomokuLauncherFX`, `GomokuGameView`, `GomokuBoardFX`, `ThemeManager` |
 
 ## Design Patterns Used
 
@@ -102,10 +104,11 @@ public abstract int evalState(byte player);
 - No UI dependency — testable and reusable
 - Immutable per move (each `doMove()` returns a new cloned state)
 
-**View** (`ttt.view`): `GomokuGameView` + `GomokuBoardFX` + `GomokuLauncherFX`
-- `GomokuLauncherFX` — start screen, mode/strategy selection
-- `GomokuGameView` — BorderPane layout, toolbar, sidebar, status labels
-- `GomokuBoardFX` — Canvas rendering (grid, stones, hints, animations)
+**View** (`ttt.view`): `GomokuLauncherFX` + `GomokuGameView` + `GomokuBoardFX` + `ThemeManager`
+- `GomokuLauncherFX` — start screen, mode/strategy selection, theme picker
+- `GomokuGameView` — BorderPane layout, toolbar, enhanced sidebar (turn badge, score, info, move history), status labels
+- `GomokuBoardFX` — Canvas rendering (grid, stones, hints, last-move marker, animations); reads the active theme's `BoardPalette`
+- `ThemeManager` — application-wide theme controller (see [Theming](#theming))
 - Never calls game logic directly
 
 **Controller** (`ttt.controller`): two controllers, different lifecycles
@@ -131,9 +134,9 @@ User clicks board → GomokuBoardFX.handleMouseClick()
       ↓
    GomokuControllerFX.onBoardClicked()
       ↓
-   currentGame.doMove()
+   currentGame.doMove()  →  recordMove() (counter, history, last-move marker)
       ↓
-   GomokuGameView.setTurnText() / GomokuBoardFX.redraw()
+   GomokuGameView.setTurn() / GomokuBoardFX.redraw()
 ```
 
 **Network game flow (PN mode):**
@@ -209,11 +212,12 @@ public IRegularGame<Pair<Byte, Byte>> doMove(Pair<Byte, Byte> move) {
 
 ## Start Screen Design
 
-`GomokuLauncherFX` implements an arcade-style start screen (red/gold + midnight theme):
+`GomokuLauncherFX` implements an arcade-style start screen. All colors come from the active theme's CSS tokens (see [Theming](#theming)); the values below are the **Dark** theme defaults:
 
 | Element | JavaFX implementation |
 |---|---|
-| Background | Gold radial glow at top (`rgba(245,166,35,0.12)`) over dark `#0f1419→#0b1016` linear gradient |
+| Background | Gold radial glow at top (`-c-glow`) over a dark `-c-bg-top→-c-bg-bottom` linear gradient |
+| Theme picker | `🎨 Theme` `ComboBox` in the "01 MATCH SETUP" header, built by `ThemeManager.createThemeSelector()` |
 | GOMOKU title | `Label("GOMOKU 🎯")` with red neon glow dropshadow — emoji embedded in the same label, inheriting the `.launcher-title` style |
 | Animated pulse dot on eyebrow | `Circle` (gold `#f5a623`) + `FadeTransition` (1.6 s, loops) |
 | Mode buttons with stone dots | Two `Circle` nodes (black/red/ai colour) displayed above the label via `ContentDisplay.TOP` |
@@ -225,3 +229,38 @@ public IRegularGame<Pair<Byte, Byte>> doMove(Pair<Byte, Byte> move) {
 | Depth descriptor with time hint | e.g. `"Balanced · ~0.8s"`, `"Expert · ~18s"` — shown in the depth card header |
 | Footer summary separators | Uses `·` and `×` (e.g. `PVA · 15×15 · ALPHABETA·D4`) |
 | Configurable board sizes | 13×13 / 15×15 / 17×17 / 19×19, passed into `new Gomoku(size, size)` |
+
+---
+
+## Theming
+
+The UI supports **seven switchable themes**: Dark, Light, Neo-Brutalist, Aurora Glass, Zen Goban, Neon Grid, and Material. The whole system is driven by `ttt.view.ThemeManager` (a singleton) plus a token-based `style.css`.
+
+### How it works
+
+1. **CSS tokens.** Every color in `style.css` is a JavaFX *looked-up color* token (e.g. `-c-accent`, `-c-card`, `-c-text`). Each theme defines one complete token block keyed by a class (`.theme-dark`, `.theme-light`, `.theme-brutalist`, …). The shared rules reference only tokens, so the look is fully data-driven.
+2. **Class swap.** `ThemeManager.register(root)` puts the active theme's class on the scene root and updates it whenever the theme changes. Because looked-up colors cascade from the root, every styled descendant re-resolves its colors automatically — no per-node restyling.
+3. **Canvas palette.** CSS cannot reach the `GomokuBoardFX` `Canvas`, so each theme also has a `ThemeManager.BoardPalette` (board face, grid, star points, both players' stone gradients, outline, glow flag). The board reads `ThemeManager.boardPalette()` and repaints on theme change.
+4. **Persistence.** The selected theme is written to `~/.gomokufx_theme` and reloaded on startup (plain file — no extra module dependency).
+
+### User entry points
+
+- **Theme picker** — `ComboBox<Theme>` from `ThemeManager.createThemeSelector()`, shown in both the launcher header and the in-game toolbar; both stay in sync via the shared `themeProperty()`.
+- **Keyboard** — `T` calls `ThemeManager.cycle()` from either screen.
+
+### Why this design
+
+| Goal | Mechanism |
+|---|---|
+| Add a new theme with minimal code | One CSS token block + one `BoardPalette` + one `enum` constant |
+| Keep all controls consistent across screens | A single factory (`createThemeSelector`) builds the picker for both views |
+| No UI logic in the model/controller | `ThemeManager` lives in `ttt.view`; controllers only call `register()` / `cycle()` |
+
+### In-game UX additions
+
+`GomokuGameView` / `GomokuControllerFX` also add a richer in-game layer on top of the base MVC flow:
+
+- **Turn badge** — prominent "X to move" indicator (tinted on Red's turn via a `:red-turn` CSS pseudo-class), reused to show the result on game over.
+- **Move history** — a scrollable `ListView` fed by `GomokuControllerFX.recordMove()`, which centralizes the move counter, last-move label, history entry, and board marker for every mode (human, AI, CC auto-play, network).
+- **Elapsed clock** — a 1-second `Timeline` (`startElapsedTimer`) that resets on restart and stops on game over / quit.
+- **Keyboard shortcuts** — `installShortcuts(Scene)`: `R` restart, `H` hint, `Ctrl+Z` undo, `Ctrl+S` save, `Ctrl+L` load, `T` cycle theme, `Esc` quit.

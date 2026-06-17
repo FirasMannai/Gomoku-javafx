@@ -7,8 +7,10 @@ import ttt.model.IRegularGame;
 import ttt.model.Pair;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.input.MouseEvent;
@@ -32,6 +34,7 @@ public class GomokuBoardFX extends Canvas {
     private int previewRow = -1;
     private int previewCol = -1;
     private Pair<Byte, Byte> hintMove;
+    private Pair<Byte, Byte> lastMove;
 
     /**
      * Constructs a GomokuBoardFX linked to the given controller.
@@ -55,8 +58,26 @@ public class GomokuBoardFX extends Canvas {
             previewCol = -1;
             redraw();
         });
+
+        // Repaint when the user switches light/dark theme (the canvas surface
+        // around the wooden board is not reachable via CSS).
+        ThemeManager.getInstance().themeProperty().addListener((obs, o, n) -> redraw());
     }
 
+    /**
+     * Makes this Canvas behave as a proper resizable node inside a BorderPane/StackPane.
+     *
+     * <p>By default, {@code Canvas} is not resizable and its {@code prefWidth}/{@code prefHeight}
+     * return the current pixel size, which causes the layout system to clamp or fight the
+     * canvas dimensions. The overrides below hand full layout control to the parent:
+     * <ul>
+     *   <li>{@code prefWidth/Height} return 0 — the canvas does not request any specific size.</li>
+     *   <li>{@code minWidth/Height} return 200 — prevents the canvas from collapsing to zero.</li>
+     *   <li>{@code maxWidth/Height} return {@code MAX_VALUE} — allows unlimited growth.</li>
+     *   <li>{@code resize()} sets the canvas pixel size directly; the existing
+     *       {@code widthProperty} listener then triggers a full {@link #redraw()}.</li>
+     * </ul>
+     */
     @Override
     public boolean isResizable() {
         return true;
@@ -64,12 +85,38 @@ public class GomokuBoardFX extends Canvas {
 
     @Override
     public double prefWidth(double height) {
-        return getWidth();
+        return 0;
     }
 
     @Override
     public double prefHeight(double width) {
-        return getHeight();
+        return 0;
+    }
+
+    @Override
+    public double minWidth(double height) {
+        return 200;
+    }
+
+    @Override
+    public double minHeight(double width) {
+        return 200;
+    }
+
+    @Override
+    public double maxWidth(double height) {
+        return Double.MAX_VALUE;
+    }
+
+    @Override
+    public double maxHeight(double width) {
+        return Double.MAX_VALUE;
+    }
+
+    @Override
+    public void resize(double width, double height) {
+        setWidth(width);
+        setHeight(height);
     }
 
     /**
@@ -85,6 +132,14 @@ public class GomokuBoardFX extends Canvas {
      */
     public void setHintMove(Pair<Byte, Byte> move) {
         this.hintMove = move;
+        redraw();
+    }
+
+    /**
+     * Marks the most recently placed stone so it can be highlighted. Pass null to clear.
+     */
+    public void setLastMove(Pair<Byte, Byte> move) {
+        this.lastMove = move;
         redraw();
     }
 
@@ -111,24 +166,27 @@ public class GomokuBoardFX extends Canvas {
         double startX = (w - boardW) / 2;
         double startY = (h - boardH) / 2;
 
-        // ---- Clear canvas ----
-        gc.setFill(Color.web("#1e1e28"));
+        ThemeManager.BoardPalette pal = ThemeManager.getInstance().boardPalette();
+
+        // ---- Clear canvas (matches the themed board-wrap behind it) ----
+        gc.setFill(pal.bg);
         gc.fillRect(0, 0, w, h);
 
-        // ---- Board background (wooden) ----
+        // ---- Board face (themed; wood, paper, glass, or neon) ----
         double pad = cellSize * 0.55;
-        gc.setFill(Color.web("#DEB887"));
-        gc.fillRoundRect(startX - pad, startY - pad,
-                boardW + 2 * pad, boardH + 2 * pad, 10, 10);
+        double bx = startX - pad, by = startY - pad;
+        double bw = boardW + 2 * pad, bh = boardH + 2 * pad;
+        gc.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, pal.boardTop), new Stop(1, pal.boardBottom)));
+        gc.fillRoundRect(bx, by, bw, bh, 10, 10);
 
-        // Wood border
-        gc.setStroke(Color.web("#8B4513"));
-        gc.setLineWidth(5);
-        gc.strokeRoundRect(startX - pad, startY - pad,
-                boardW + 2 * pad, boardH + 2 * pad, 10, 10);
+        // Board border
+        gc.setStroke(pal.boardBorder);
+        gc.setLineWidth(pal.boardBorderWidth);
+        gc.strokeRoundRect(bx, by, bw, bh, 10, 10);
 
         // ---- Grid lines ----
-        gc.setStroke(Color.web("#222222"));
+        gc.setStroke(pal.grid);
         gc.setLineWidth(1);
         for (int r = 0; r < rows; r++) {
             double y = startY + r * cellSize;
@@ -142,7 +200,7 @@ public class GomokuBoardFX extends Canvas {
         // ---- Star points (standard 15x15) ----
         if (rows == 15 && cols == 15) {
             int[][] stars = { { 3, 3 }, { 3, 11 }, { 7, 7 }, { 11, 3 }, { 11, 11 } };
-            gc.setFill(Color.web("#222222"));
+            gc.setFill(pal.star);
             for (int[] s : stars) {
                 double cx = startX + s[1] * cellSize;
                 double cy = startY + s[0] * cellSize;
@@ -161,9 +219,23 @@ public class GomokuBoardFX extends Canvas {
                 if (p != game.getPlayerNone()) {
                     double cx = startX + c * cellSize;
                     double cy = startY + r * cellSize;
-                    drawStone(gc, cx, cy, halfStone, stoneDiam, p == game.getPlayer1());
+                    drawStone(gc, cx, cy, halfStone, stoneDiam, p == game.getPlayer1(), pal);
                 }
             }
+        }
+
+        // ---- Last-move marker (small bright dot at the centre of the newest stone) ----
+        if (lastMove != null
+                && lastMove.first < rows && lastMove.second < cols
+                && game.getAtPosition(lastMove.first, lastMove.second) != game.getPlayerNone()) {
+            double mx = startX + lastMove.second * cellSize;
+            double my = startY + lastMove.first * cellSize;
+            double dot = Math.max(5, cellSize / 7);
+            gc.setFill(Color.web("#ffe9a8"));
+            gc.fillOval(mx - dot / 2, my - dot / 2, dot, dot);
+            gc.setStroke(Color.web("#b8860b"));
+            gc.setLineWidth(1);
+            gc.strokeOval(mx - dot / 2, my - dot / 2, dot, dot);
         }
 
         // ---- Ghost preview ----
@@ -173,7 +245,8 @@ public class GomokuBoardFX extends Canvas {
             double cx = startX + previewCol * cellSize;
             double cy = startY + previewRow * cellSize;
             gc.setGlobalAlpha(0.35);
-            gc.setFill(game.currentPlayer() == game.getPlayer1() ? Color.BLACK : Color.RED);
+            Color[] ghost = game.currentPlayer() == game.getPlayer1() ? pal.p1 : pal.p2;
+            gc.setFill(ghost[1]);
             gc.fillOval(cx - halfStone, cy - halfStone, stoneDiam, stoneDiam);
             gc.setGlobalAlpha(1.0);
         }
@@ -216,32 +289,36 @@ public class GomokuBoardFX extends Canvas {
     }
 
     /**
-     * Draws a single stone with a radial gradient for a 3D appearance.
+     * Draws a single stone using the active theme's palette. Player-1 and
+     * player-2 stones each get a three-stop radial gradient for a 3D look; themes
+     * that opt into {@code glow} get a soft drop-shadow halo in the stone's hue.
      */
     private void drawStone(GraphicsContext gc, double cx, double cy,
-            double r, double d, boolean isBlack) {
+            double r, double d, boolean isPlayer1, ThemeManager.BoardPalette pal) {
         double x = cx - r;
         double y = cy - r;
-        if (isBlack) {
-            RadialGradient grad = new RadialGradient(
-                    0, 0, cx - r * 0.3, cy - r * 0.3, r,
-                    false, CycleMethod.NO_CYCLE,
-                    new Stop(0, Color.web("#606060")),
-                    new Stop(0.6, Color.web("#2a2a2a")),
-                    new Stop(1, Color.web("#0a0a0a")));
-            gc.setFill(grad);
-        } else {
-            RadialGradient grad = new RadialGradient(
-                    0, 0, cx - r * 0.3, cy - r * 0.3, r,
-                    false, CycleMethod.NO_CYCLE,
-                    new Stop(0, Color.web("#FF7777")),
-                    new Stop(0.6, Color.web("#DD2222")),
-                    new Stop(1, Color.web("#AA0000")));
-            gc.setFill(grad);
+        Color[] stops = isPlayer1 ? pal.p1 : pal.p2;
+
+        if (pal.glow) {
+            DropShadow halo = new DropShadow();
+            halo.setColor(stops[1]);
+            halo.setRadius(Math.max(6, r * 0.9));
+            halo.setSpread(0.25);
+            gc.setEffect(halo);
         }
+
+        RadialGradient grad = new RadialGradient(
+                0, 0, cx - r * 0.3, cy - r * 0.3, r,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, stops[0]),
+                new Stop(0.6, stops[1]),
+                new Stop(1, stops[2]));
+        gc.setFill(grad);
         gc.fillOval(x, y, d, d);
-        gc.setStroke(Color.web("#1a1a1a"));
-        gc.setLineWidth(1.2);
+        gc.setEffect(null);
+
+        gc.setStroke(pal.stoneStroke);
+        gc.setLineWidth(pal.stoneStrokeWidth);
         gc.strokeOval(x, y, d, d);
     }
 

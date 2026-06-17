@@ -7,11 +7,13 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -273,6 +275,14 @@ public class GomokuLauncherFX extends StackPane {
         Label heading = new Label("01  MATCH SETUP");
         heading.getStyleClass().add("settings-heading");
 
+        Region headingSpacer = new Region();
+        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
+        Label themeLabel = new Label("🎨 Theme");
+        themeLabel.getStyleClass().add("field-title");
+        ComboBox<ThemeManager.Theme> themeSelector = ThemeManager.getInstance().createThemeSelector();
+        HBox headingRow = new HBox(10, heading, headingSpacer, themeLabel, themeSelector);
+        headingRow.setAlignment(Pos.CENTER_LEFT);
+
         GridPane firstRow = new GridPane();
         firstRow.setHgap(12);
         firstRow.getColumnConstraints().addAll(equalColumn(), equalColumn());
@@ -292,13 +302,17 @@ public class GomokuLauncherFX extends StackPane {
         startButton.getStyleClass().addAll("launcher-button", "primary");
         exitButton.getStyleClass().addAll("launcher-button", "ghost");
         startButton.setMaxWidth(Double.MAX_VALUE);
+        startButton.setTooltip(new Tooltip("Start the match with the current setup  (Enter)"));
+        exitButton.setTooltip(new Tooltip("Close the application  (Esc)"));
+        startButton.setDefaultButton(true);
+        exitButton.setCancelButton(true);
 
         HBox buttonRow = new HBox(10, startButton, exitButton);
         buttonRow.getStyleClass().add("cta-row");
         buttonRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(startButton, Priority.ALWAYS);
 
-        VBox panel = new VBox(12, heading, firstRow, secondRow, depthCard, debugRow, buttonRow);
+        VBox panel = new VBox(12, headingRow, firstRow, secondRow, depthCard, debugRow, buttonRow);
         panel.getStyleClass().add("settings-panel");
         return panel;
     }
@@ -396,11 +410,10 @@ public class GomokuLauncherFX extends StackPane {
         Canvas miniGrid = buildMiniGrid(n, 28);
 
         Label numLabel = new Label(String.valueOf(n));
-        numLabel.setStyle(
-            "-fx-text-fill:#e6edf3;-fx-font-family:'Consolas',monospace;-fx-font-size:11px;-fx-font-weight:bold;");
+        numLabel.getStyleClass().add("size-num");
 
         Label nameLabel = new Label(label);
-        nameLabel.setStyle("-fx-text-fill:#5a6776;-fx-font-size:8px;-fx-font-weight:bold;");
+        nameLabel.getStyleClass().add("size-name");
 
         VBox graphic = new VBox(2, miniGrid, numLabel, nameLabel);
         graphic.setAlignment(Pos.CENTER);

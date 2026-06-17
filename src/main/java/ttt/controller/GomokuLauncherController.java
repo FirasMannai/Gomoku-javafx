@@ -142,22 +142,27 @@ public class GomokuLauncherController {
                 view.getDebugCheckBox().isSelected());
     }
 
+    /** @return the selected game-mode code ("PVP", "PVA", or "AVA"). */
     private String getSelectedMode() {
         return (String) view.getModeGroup().getSelectedToggle().getUserData();
     }
 
+    /** @return the selected board dimension (13, 15, 17, or 19). */
     private int getSelectedBoardSize() {
         return (Integer) view.getBoardSizeGroup().getSelectedToggle().getUserData();
     }
 
+    /** @return Black's selected strategy code (S1–S4). */
     private String getSelectedBlackStrategy() {
         return (String) view.getBlackStrategyGroup().getSelectedToggle().getUserData();
     }
 
+    /** @return Red's selected strategy code (S1–S4). */
     private String getSelectedRedStrategy() {
         return (String) view.getRedStrategyGroup().getSelectedToggle().getUserData();
     }
 
+    /** @return the selected AI search depth (1–8), rounded from the slider. */
     private int getSelectedDepth() {
         return (int) Math.round(view.getDepthSlider().getValue());
     }
@@ -329,30 +334,37 @@ public class GomokuLauncherController {
             this.debug = debug;
         }
 
+        /** @return the engine mode code: "PP", "PC", or "CC". */
         public String getInternalMode() {
             return internalMode;
         }
 
+        /** @return the display mode label: "PVP", "PVA", or "AVA". */
         public String getDisplayMode() {
             return displayMode;
         }
 
+        /** @return the board dimension (e.g. 15 for a 15×15 board). */
         public int getBoardSize() {
             return boardSize;
         }
 
+        /** @return Black's AI strategy code, or {@code null} if Black is human. */
         public String getBlackStrategyCode() {
             return blackStrategyCode;
         }
 
+        /** @return Red's AI strategy code, or {@code null} if Red is human. */
         public String getRedStrategyCode() {
             return redStrategyCode;
         }
 
+        /** @return the search depth for depth-limited strategies (1–8). */
         public int getAiDepth() {
             return aiDepth;
         }
 
+        /** @return {@code true} if the debug overlay / move trace is enabled. */
         public boolean isDebug() {
             return debug;
         }
