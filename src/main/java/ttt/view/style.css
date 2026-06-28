@@ -293,6 +293,23 @@
 .move-list .list-cell:filled:hover { -fx-background-color: -c-ghost-hover-bg; }
 .move-list .list-cell:filled:selected { -fx-background-color: -c-accent-tint; -fx-text-fill: -c-value; }
 
+/* Move-history row parts (rendered via cell factory) */
+.move-no   { -fx-text-fill: -c-dim;   -fx-font-family: "Consolas", "JetBrains Mono", monospace; -fx-font-size: 11px; }
+.move-co   { -fx-text-fill: -c-value; -fx-font-family: "Consolas", "JetBrains Mono", monospace; -fx-font-size: 11px; -fx-font-weight: bold; }
+.move-time { -fx-text-fill: -c-muted; -fx-font-family: "Consolas", "JetBrains Mono", monospace; -fx-font-size: 10.5px; }
+
+/* Live elapsed clock in the move-history card header */
+.history-clock {
+    -fx-text-fill: -c-accent;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+}
+
+/* Emoji labels: force the color-emoji font so glyphs render in color (and at all).
+   Listed last so it overrides the monospace font-family on equal-specificity rules. */
+.emoji { -fx-font-family: "Segoe UI Emoji"; }
+
 /* --- Card Panel --- */
 .card-panel {
     -fx-background-color: -c-card;
@@ -321,6 +338,12 @@
     -fx-text-fill: -c-value;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
 }
+
+/* Tints for card-title emoji glyphs (emoji render monochrome on JavaFX 21, so
+   each is tinted toward its natural dominant color). */
+.trophy-icon { -fx-text-fill: #f5a623; }   /* gold trophy   */
+.icon-gamepad { -fx-text-fill: #1c1c1c; }  /* black gamepad */
+.icon-scroll  { -fx-text-fill: #f5f0e6; }  /* cream scroll  */
 
 /* --- Status Bar --- */
 .status-bar {

@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
@@ -46,10 +47,6 @@ public class GomokuGameView extends BorderPane {
     // Dynamic labels updated by the controller
     private Label blackScoreLabel;
     private Label redScoreLabel;
-    private Label lastMoveLabel;
-    private Label aiThinkLabel;
-    private Label playerTimeLabel;
-    private Label moveCountLabel;
     private Label elapsedLabel;
     private Label statusLabel;
     private Button undoButton;
@@ -60,7 +57,30 @@ public class GomokuGameView extends BorderPane {
     private HBox turnBadge;
 
     // Scrollable move history
-    private ListView<String> moveListView;
+    private ListView<MoveRow> moveListView;
+
+    // Score-card stone markers (recolored on theme change)
+    private Circle blackScoreDot;
+    private Circle redScoreDot;
+
+    /**
+     * Immutable row model backing the move-history list: move number, side,
+     * coordinate, and the formatted duration the mover took (AI think time /
+     * human time; may be empty when unknown).
+     */
+    private static final class MoveRow {
+        final int number;
+        final boolean isBlack;
+        final String coord;
+        final String duration;
+
+        MoveRow(int number, boolean isBlack, String coord, String duration) {
+            this.number = number;
+            this.isBlack = isBlack;
+            this.coord = coord;
+            this.duration = duration;
+        }
+    }
 
     /**
      * Constructs the game view with all UI regions.
@@ -79,6 +99,9 @@ public class GomokuGameView extends BorderPane {
         setCenter(createCenterBoard());
         setRight(createSidebar());
         setBottom(createStatusBar());
+
+        // Keep the sidebar stone markers in sync with the active theme's board palette.
+        ThemeManager.getInstance().themeProperty().addListener((obs, oldT, newT) -> refreshStoneColors());
     }
 
     // ==================== TOOLBAR ====================
@@ -185,22 +208,11 @@ public class GomokuGameView extends BorderPane {
             s2Name = getStrategyName(controller.getAI1());
         }
 
-        VBox modeCard = createCard("🎮 Game Mode",
+        VBox modeCard = createCard("🎮 Game Mode", "icon-gamepad",
                 new String[] { "Mode:", "Black:", "Red:" },
                 new Label[] { createValueLabel(modeLabel(mode)), createValueLabel(s1Name), createValueLabel(s2Name) });
 
-        // ---- Game Info card ----
-        moveCountLabel = createValueLabel("0");
-        elapsedLabel = createValueLabel("00:00");
-        lastMoveLabel = createValueLabel("-");
-        aiThinkLabel = createValueLabel("-");
-        playerTimeLabel = createValueLabel("-");
-
-        VBox infoCard = createCard("⏱ Game Info",
-                new String[] { "Moves:", "Elapsed:", "Last Move:", "AI Think:", "Your Time:" },
-                new Label[] { moveCountLabel, elapsedLabel, lastMoveLabel, aiThinkLabel, playerTimeLabel });
-
-        // ---- Move history (scrollable, grows to fill) ----
+        // ---- Move history with live elapsed clock (scrollable, grows to fill) ----
         VBox historyCard = createHistoryCard();
         VBox.setVgrow(historyCard, Priority.ALWAYS);
 
@@ -221,7 +233,7 @@ public class GomokuGameView extends BorderPane {
         HBox.setHgrow(saveBtn, Priority.ALWAYS);
         HBox.setHgrow(loadBtn, Priority.ALWAYS);
 
-        sidebar.getChildren().addAll(heading, turnBox, scoreCard, modeCard, infoCard, historyCard, fileRow);
+        sidebar.getChildren().addAll(heading, turnBox, scoreCard, modeCard, historyCard, fileRow);
         return sidebar;
     }
 
@@ -252,13 +264,21 @@ public class GomokuGameView extends BorderPane {
         card.getStyleClass().add("card-panel");
         card.setPadding(new Insets(11));
 
-        Label titleLabel = new Label("🏆 Score");
-        titleLabel.getStyleClass().add("card-title");
+        // Trophy tinted gold (emoji are monochrome on JavaFX 21, so they'd
+        // otherwise pick up the muted theme color).
+        HBox titleLabel = cardTitle("🏆", "Score", "trophy-icon");
 
-        Label blackKey = new Label("⚫ Black");
-        blackKey.getStyleClass().add("card-label");
-        Label redKey = new Label("🔴 Red");
-        redKey.getStyleClass().add("card-label");
+        blackScoreDot = stoneDot(true, 5);
+        Label blackText = new Label("Black");
+        blackText.getStyleClass().add("card-label");
+        HBox blackKey = new HBox(5, blackScoreDot, blackText);
+        blackKey.setAlignment(Pos.CENTER);
+
+        redScoreDot = stoneDot(false, 5);
+        Label redText = new Label("Red");
+        redText.getStyleClass().add("card-label");
+        HBox redKey = new HBox(5, redScoreDot, redText);
+        redKey.setAlignment(Pos.CENTER);
 
         VBox blackCol = new VBox(2, blackKey, blackScoreLabel);
         blackCol.setAlignment(Pos.CENTER);
@@ -279,22 +299,67 @@ public class GomokuGameView extends BorderPane {
         return card;
     }
 
-    /** Move-history card wrapping a styled, scrollable list. */
+    /**
+     * Move-history card: a header with the title and a live elapsed clock, above
+     * a styled, scrollable list. Each row shows the move number, the stone, the
+     * coordinate, and how long the mover took (AI think time / human time).
+     */
     private VBox createHistoryCard() {
         VBox card = new VBox(8);
         card.getStyleClass().add("card-panel");
         card.setPadding(new Insets(11));
 
-        Label titleLabel = new Label("📜 Move History");
-        titleLabel.getStyleClass().add("card-title");
+        HBox titleLabel = cardTitle("📜", "Move History", "icon-scroll");
+
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+
+        elapsedLabel = new Label("00:00");
+        elapsedLabel.getStyleClass().add("history-clock");
+        Label clockIcon = new Label("⏱");
+        clockIcon.getStyleClass().addAll("history-clock", "emoji");
+
+        HBox header = new HBox(5, titleLabel, headerSpacer, clockIcon, elapsedLabel);
+        header.setAlignment(Pos.CENTER_LEFT);
 
         moveListView = new ListView<>();
         moveListView.getStyleClass().add("move-list");
         moveListView.setFocusTraversable(false);
         moveListView.setPlaceholder(placeholderLabel("No moves yet"));
+        moveListView.setCellFactory(lv -> new ListCell<MoveRow>() {
+            @Override
+            protected void updateItem(MoveRow m, boolean empty) {
+                super.updateItem(m, empty);
+                if (empty || m == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+                Label number = new Label(String.format("%2d.", m.number));
+                number.getStyleClass().add("move-no");
+
+                // Real colored stone (emoji render monochrome on JavaFX 21, so they
+                // can't be told apart) — black vs red circles matching the turn badge.
+                Circle stone = stoneDot(m.isBlack, 5);
+
+                Label coordLabel = new Label(m.coord);
+                coordLabel.getStyleClass().add("move-co");
+
+                Region fill = new Region();
+                HBox.setHgrow(fill, Priority.ALWAYS);
+
+                Label durationLabel = new Label(m.duration == null ? "" : m.duration);
+                durationLabel.getStyleClass().add("move-time");
+
+                HBox row = new HBox(8, number, stone, coordLabel, fill, durationLabel);
+                row.setAlignment(Pos.CENTER_LEFT);
+                setText(null);
+                setGraphic(row);
+            }
+        });
         VBox.setVgrow(moveListView, Priority.ALWAYS);
 
-        card.getChildren().addAll(titleLabel, moveListView);
+        card.getChildren().addAll(header, moveListView);
         return card;
     }
 
@@ -303,6 +368,60 @@ public class GomokuGameView extends BorderPane {
         Label label = new Label(text);
         label.getStyleClass().add("card-label");
         return label;
+    }
+
+    /**
+     * Builds a card title with a tinted leading emoji icon followed by plain text.
+     * The icon sits in its own label so only it is colored (emoji render as a
+     * single-color glyph on JavaFX 21).
+     *
+     * @param icon      the emoji glyph
+     * @param text      the title text
+     * @param iconClass the style class controlling the icon's tint
+     * @return the assembled title row
+     */
+    private HBox cardTitle(String icon, String text, String iconClass) {
+        Label iconLabel = new Label(icon);
+        iconLabel.getStyleClass().addAll("card-title", iconClass);
+        Label textLabel = new Label(text);
+        textLabel.getStyleClass().add("card-title");
+        HBox box = new HBox(5, iconLabel, textLabel);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
+    }
+
+    /**
+     * Builds a small stone marker (black/player-1 or red/player-2 circle) colored
+     * from the active theme's board palette, so it matches the stones on the board
+     * and updates when the theme changes (see {@link #refreshStoneColors()}).
+     *
+     * @param isBlack {@code true} for a player-1 stone, {@code false} for player-2
+     * @param radius  the circle radius in pixels
+     * @return the styled {@link Circle}
+     */
+    private Circle stoneDot(boolean isBlack, double radius) {
+        Circle dot = new Circle(radius);
+        dot.setStrokeWidth(1);
+        tintStone(dot, isBlack);
+        return dot;
+    }
+
+    /** Applies the active theme's board-palette stone colors to a marker circle. */
+    private void tintStone(Circle dot, boolean isBlack) {
+        ThemeManager.BoardPalette palette = ThemeManager.getInstance().boardPalette();
+        Color[] stops = isBlack ? palette.p1 : palette.p2;
+        dot.setFill(stops[1]);
+        dot.setStroke(palette.stoneStroke);
+    }
+
+    /**
+     * Re-applies the current theme's stone colors to the score-card markers and
+     * forces the move-history list to repaint its cells. Called on theme change.
+     */
+    private void refreshStoneColors() {
+        if (blackScoreDot != null) tintStone(blackScoreDot, true);
+        if (redScoreDot != null) tintStone(redScoreDot, false);
+        if (moveListView != null) moveListView.refresh();
     }
 
     /** Maps the internal mode code to a friendly label. */
@@ -317,16 +436,22 @@ public class GomokuGameView extends BorderPane {
     }
 
     /**
-     * Creates a card panel with a title and key-value rows.
+     * Creates a card panel with a title and key-value rows. A leading emoji in
+     * {@code title} (text before the first space) is tinted via {@code iconClass}.
      */
-    private VBox createCard(String title, String[] keys, Label[] values) {
+    private VBox createCard(String title, String iconClass, String[] keys, Label[] values) {
         VBox card = new VBox(8);
         card.getStyleClass().add("card-panel");
         card.setPadding(new Insets(11));
 
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("card-title");
-        card.getChildren().add(titleLabel);
+        int sp = title.indexOf(' ');
+        if (sp > 0) {
+            card.getChildren().add(cardTitle(title.substring(0, sp), title.substring(sp + 1), iconClass));
+        } else {
+            Label titleLabel = new Label(title);
+            titleLabel.getStyleClass().add("card-title");
+            card.getChildren().add(titleLabel);
+        }
 
         for (int i = 0; i < keys.length; i++) {
             Label keyLabel = new Label(keys[i]);
@@ -397,12 +522,7 @@ public class GomokuGameView extends BorderPane {
         turnBadgeLabel.setText(text);
     }
 
-    /** Updates the total move counter in the info card. */
-    public void setMoveCount(int count) {
-        moveCountLabel.setText(String.valueOf(count));
-    }
-
-    /** Updates the elapsed-time readout (formatted MM:SS). */
+    /** Updates the elapsed-time readout in the history-card header (formatted MM:SS). */
     public void setElapsed(String text) {
         elapsedLabel.setText(text);
     }
@@ -410,13 +530,13 @@ public class GomokuGameView extends BorderPane {
     /**
      * Appends a move to the history list and scrolls it into view.
      *
-     * @param number  the 1-based move number
-     * @param isBlack whether Black made the move
-     * @param coord   the coordinate label (e.g. "8,8")
+     * @param number   the 1-based move number
+     * @param isBlack  whether Black made the move
+     * @param coord    the coordinate label (e.g. "H8")
+     * @param duration the formatted time the mover took (e.g. "0.412 s" / "3.1 s"); may be empty
      */
-    public void addMove(int number, boolean isBlack, String coord) {
-        String entry = String.format("%2d.  %s  %s", number, isBlack ? "⚫" : "🔴", coord);
-        moveListView.getItems().add(entry);
+    public void addMove(int number, boolean isBlack, String coord, String duration) {
+        moveListView.getItems().add(new MoveRow(number, isBlack, coord, duration));
         moveListView.scrollTo(moveListView.getItems().size() - 1);
     }
 
@@ -441,33 +561,6 @@ public class GomokuGameView extends BorderPane {
      */
     public void setRedScore(String text) {
         redScoreLabel.setText(text);
-    }
-
-    /**
-     * Updates the "Last Move" readout in the info card.
-     *
-     * @param text the coordinate label (e.g. "H8") or a status word
-     */
-    public void setLastMove(String text) {
-        lastMoveLabel.setText(text);
-    }
-
-    /**
-     * Updates the AI thinking-time readout in the info card.
-     *
-     * @param text the formatted duration (e.g. "0.123 s")
-     */
-    public void setAIThinkTime(String text) {
-        aiThinkLabel.setText(text);
-    }
-
-    /**
-     * Updates the human player's thinking-time readout in the info card.
-     *
-     * @param text the formatted duration (e.g. "1.5 s")
-     */
-    public void setPlayerTime(String text) {
-        playerTimeLabel.setText(text);
     }
 
     /**

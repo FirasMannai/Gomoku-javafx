@@ -228,7 +228,6 @@ public class GomokuControllerFX {
             // Measure player thinking time
             long playerEnd = System.nanoTime();
             double playerSeconds = (playerEnd - playerMoveStartNanos) / 1_000_000_000.0;
-            view.setPlayerTime(String.format("%.1f s", playerSeconds));
 
             clearHint();
 
@@ -240,7 +239,7 @@ public class GomokuControllerFX {
             IRegularGame<Pair<Byte, Byte>> next = g.setAtPosition(row, col);
             currentGame = next;
             boardFX.setGame(currentGame);
-            recordMove(currentPlayer, row, col);
+            recordMove(currentPlayer, row, col, String.format("%.1f s", playerSeconds));
 
             if ("PC".equals(mode))
                 addToHistory(next);
@@ -279,7 +278,6 @@ public class GomokuControllerFX {
         IGame<Pair<Byte, Byte>> nextAI = ai1.doBestMove(before);
         long end = System.nanoTime();
         double seconds = (end - start) / 1_000_000_000.0;
-        view.setAIThinkTime(String.format("%.3f s", seconds));
 
         @SuppressWarnings("unchecked")
         IRegularGame<Pair<Byte, Byte>> after = (IRegularGame<Pair<Byte, Byte>>) nextAI;
@@ -292,7 +290,7 @@ public class GomokuControllerFX {
         if (move != null) {
             if (Debugger.isDebug())
                 Debugger.log(aiPlayer, move.first, move.second);
-            recordMove(aiPlayer, move.first, move.second);
+            recordMove(aiPlayer, move.first, move.second, String.format("%.3f s", seconds));
         }
         addToHistory(after);
         updateUI();
@@ -322,7 +320,6 @@ public class GomokuControllerFX {
                 IGame<Pair<Byte, Byte>> next = ai.doBestMove(before);
                 long end = System.nanoTime();
                 double seconds = (end - start) / 1_000_000_000.0;
-                view.setAIThinkTime(String.format("%.3f s", seconds));
 
                 @SuppressWarnings("unchecked")
                 IRegularGame<Pair<Byte, Byte>> after = (IRegularGame<Pair<Byte, Byte>>) next;
@@ -335,7 +332,7 @@ public class GomokuControllerFX {
                 if (move != null) {
                     if (Debugger.isDebug())
                         Debugger.log(aiPlayer, move.first, move.second);
-                    recordMove(aiPlayer, move.first, move.second);
+                    recordMove(aiPlayer, move.first, move.second, String.format("%.3f s", seconds));
                 }
                 updateUI();
 
@@ -375,9 +372,6 @@ public class GomokuControllerFX {
 
         clearHint();
         resetTracking();
-        view.setLastMove("-");
-        view.setAIThinkTime("-");
-        view.setPlayerTime("-");
         view.setStatus("Ready to play");
         playerMoveStartNanos = System.nanoTime();
         updateUI();
@@ -412,7 +406,7 @@ public class GomokuControllerFX {
         currentGame = cloneGame(prev);
         boardFX.setGame(currentGame);
         clearHint();
-        view.setLastMove("Undo used");
+        view.setStatus("Undo used");
         playerMoveStartNanos = System.nanoTime();
         updateUI();
     }
@@ -487,9 +481,7 @@ public class GomokuControllerFX {
 
             resetTracking();
             moveCount = countStones(currentGame);
-            view.setMoveCount(moveCount);
             view.setStatus("\uD83D\uDCC2 Game loaded from savedgame.xml");
-            view.setLastMove("-");
             updateUI();
             showInfoAlert("Load", "Game loaded from savedgame.xml");
         } catch (Exception ex) {
@@ -543,7 +535,7 @@ public class GomokuControllerFX {
         byte mover = currentGame.currentPlayer();
         currentGame = currentGame.setAtPosition((byte) row, (byte) col);
         boardFX.setGame(currentGame);
-        recordMove(mover, (byte) row, (byte) col);
+        recordMove(mover, (byte) row, (byte) col, "");
         updateUI();
         isMyNetworkTurn = true;
         if (currentGame.endedGame())
@@ -701,17 +693,17 @@ public class GomokuControllerFX {
      * move" readout, appends to the sidebar history list, and marks the stone as
      * the most recent one on the board.
      *
-     * @param player the player who placed the stone
-     * @param row    board row (0-indexed)
-     * @param col    board column (0-indexed)
+     * @param player   the player who placed the stone
+     * @param row      board row (0-indexed)
+     * @param col      board column (0-indexed)
+     * @param duration the time the mover took, formatted for the history list
+     *                 (e.g. "0.412 s" / "3.1 s"); may be empty when unknown
      */
-    private void recordMove(byte player, byte row, byte col) {
+    private void recordMove(byte player, byte row, byte col, String duration) {
         moveCount++;
         boolean isBlack = player == currentGame.getPlayer1();
         String coord = coordLabel(row, col);
-        view.setLastMove(coord);
-        view.setMoveCount(moveCount);
-        view.addMove(moveCount, isBlack, coord);
+        view.addMove(moveCount, isBlack, coord, duration);
         boardFX.setLastMove(new Pair<>(row, col));
     }
 
@@ -740,7 +732,6 @@ public class GomokuControllerFX {
      */
     private void resetTracking() {
         moveCount = 0;
-        view.setMoveCount(0);
         view.clearHistory();
         view.setElapsed("00:00");
         boardFX.setLastMove(null);
