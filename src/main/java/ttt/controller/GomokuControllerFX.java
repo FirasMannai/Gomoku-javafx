@@ -95,7 +95,7 @@ public class GomokuControllerFX {
     /** Nanosecond timestamp of the start of the current human player's turn, used to display thinking time. */
     private long playerMoveStartNanos = System.nanoTime();
 
-    /** Total number of stones placed so far this game (shown in the sidebar and history). */
+    /** Total number of stones placed so far this game; used to number the entries in the move-history list. */
     private int moveCount = 0;
 
     /** Nanosecond timestamp marking when the current game began, used for the elapsed clock. */
@@ -111,7 +111,7 @@ public class GomokuControllerFX {
      * @param game  The initial game state.
      * @param ai1   AI for Player 1 (Black). May be null in PP mode.
      * @param ai2   AI for Player 2 (Red). May be null in PP/PC mode.
-     * @param mode  Game mode: "PP", "PC", or "CC".
+     * @param mode  Game mode: "PP", "PC", "CC", or "PN" (network).
      * @param stage The primary stage for scene switching.
      */
     public GomokuControllerFX(IRegularGame<Pair<Byte, Byte>> game,
@@ -139,27 +139,16 @@ public class GomokuControllerFX {
             Debugger.printMoveHeader();
         }
 
-        // Preserve stage size/maximized state across scene switch.
-        // Passing explicit width/height to new Scene() forces JavaFX to resize
-        // the stage to those values, which un-maximizes it — so we use no-arg
-        // Scene constructor and restore the previous dimensions ourselves.
-        boolean wasMaximized = stage.isMaximized();
-        double prevW = Double.isNaN(stage.getWidth())  || stage.getWidth()  <= 0 ? 1100 : stage.getWidth();
-        double prevH = Double.isNaN(stage.getHeight()) || stage.getHeight() <= 0 ? 700  : stage.getHeight();
-
+        // Use a no-arg Scene (passing explicit width/height would force-resize and
+        // un-maximize the stage); sizing is delegated to the shared, screen-aware
+        // helper so the window keeps its size across the scene switch and stays
+        // within the display bounds.
         Scene gameScene = new Scene(view);
         gameScene.getStylesheets().add(getClass().getResource("/ttt/view/style.css").toExternalForm());
         ThemeManager.getInstance().register(view);
         installShortcuts(gameScene);
         stage.setScene(gameScene);
-        stage.setMinWidth(940);
-        stage.setMinHeight(620);
-        if (wasMaximized) {
-            stage.setMaximized(true);
-        } else {
-            stage.setWidth(Math.max(1100, prevW));
-            stage.setHeight(Math.max(700, prevH));
-        }
+        GomokuFXApp.applyStageBounds(stage);
 
         updateUI();
 
@@ -668,8 +657,23 @@ public class GomokuControllerFX {
 
         view.setStatus("Game Over \u2014 " + msg);
 
+        // Append the winning line (board coordinates, e.g. "H9 \u00b7 I9 \u00b7 ...") to the message.
+        String dialogText = msg;
+        if (winner != 0 && currentGame instanceof Gomoku) {
+            List<Pair<Byte, Byte>> winning = ((Gomoku) currentGame).getWinningStones();
+            if (winning != null && winning.size() == 5) {
+                StringBuilder line = new StringBuilder();
+                for (int i = 0; i < winning.size(); i++) {
+                    Pair<Byte, Byte> s = winning.get(i);
+                    line.append(i > 0 ? " \u00b7 " : "").append(coordLabel(s.first, s.second));
+                }
+                dialogText += "\nWinning line: " + line;
+            }
+        }
+        dialogText += "\nPlay again?";
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                msg + "\nPlay again?", ButtonType.YES, ButtonType.NO);
+                dialogText, ButtonType.YES, ButtonType.NO);
         alert.setTitle("Game Over");
         alert.setHeaderText(null);
         Optional<ButtonType> result = alert.showAndWait();
@@ -689,9 +693,9 @@ public class GomokuControllerFX {
     }
 
     /**
-     * Records a single placed stone: bumps the move counter, updates the "last
-     * move" readout, appends to the sidebar history list, and marks the stone as
-     * the most recent one on the board.
+     * Records a single placed stone: bumps the move counter, appends it (with its
+     * duration) to the move-history list, and marks the stone as the most recent
+     * one on the board.
      *
      * @param player   the player who placed the stone
      * @param row      board row (0-indexed)
