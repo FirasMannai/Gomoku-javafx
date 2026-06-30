@@ -176,7 +176,7 @@ public class GomokuLauncherFX extends StackPane {
         title.getStyleClass().add("launcher-title");
         HBox titleRow = new HBox(title);
         titleRow.setAlignment(Pos.CENTER_LEFT);
-        VBox.setMargin(titleRow, new Insets(16, 0, 0, 0));
+        VBox.setMargin(titleRow, new Insets(16, 0, 0, 30));
 
         Label subtitle = new Label(
             "Five in a row. Centuries of patterns, played on a sized board. Pick your side, your opponent, your weapon.");
@@ -209,7 +209,7 @@ public class GomokuLauncherFX extends StackPane {
 
         summaryLabel.getStyleClass().add("launcher-footer-summary");
 
-        VBox.setMargin(subtitle, new Insets(10, 0, 0, 0));
+        VBox.setMargin(subtitle, new Insets(10, 0, 0, 30));
         VBox.setMargin(previewCard, new Insets(28, 0, 0, 0));
         VBox hero = new VBox(14, eyebrow, titleRow, subtitle, previewCard, spacer, summaryLabel);
         hero.getStyleClass().add("hero-column");
