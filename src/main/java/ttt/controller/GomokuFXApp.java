@@ -12,10 +12,12 @@ import ttt.ai.IGameKI;
 import ttt.model.Pair;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -215,10 +217,6 @@ public class GomokuFXApp extends Application {
      * @param stage The primary stage.
      */
     public static void showLauncher(Stage stage) {
-        boolean wasMaximized = stage.isMaximized();
-        double prevW = Double.isNaN(stage.getWidth())  || stage.getWidth()  <= 0 ? 1100 : stage.getWidth();
-        double prevH = Double.isNaN(stage.getHeight()) || stage.getHeight() <= 0 ? 700  : stage.getHeight();
-
         GomokuLauncherFX launcher = new GomokuLauncherFX();
         new GomokuLauncherController(launcher, stage);
         Scene scene = new Scene(launcher);
@@ -231,13 +229,41 @@ public class GomokuFXApp extends Application {
             }
         });
         stage.setScene(scene);
-        stage.setMinWidth(940);
-        stage.setMinHeight(620);
-        if (wasMaximized) {
-            stage.setMaximized(true);
-        } else {
-            stage.setWidth(Math.max(1100, prevW));
-            stage.setHeight(Math.max(700, prevH));
+        applyStageBounds(stage);
+    }
+
+    /**
+     * Sizes and positions the stage so the window always fits the current screen.
+     * <p>
+     * Keeps a maximized window maximized across scene switches. Otherwise it
+     * preserves the current size on a scene switch (or uses a 1100x700 default on
+     * first show), but clamps both that size and the minimum size to the screen's
+     * visual bounds (the work area, excluding the taskbar) so the window can never
+     * open — nor be forced by its minimum — larger than the display. On first show
+     * the window is centered in the work area.
+     *
+     * @param stage the primary stage to size
+     */
+    static void applyStageBounds(Stage stage) {
+        Rectangle2D vb = Screen.getPrimary().getVisualBounds();
+
+        // Minimums must themselves fit the screen, else a small laptop can't shrink to fit.
+        stage.setMinWidth(Math.min(940, vb.getWidth()));
+        stage.setMinHeight(Math.min(620, vb.getHeight()));
+
+        if (stage.isMaximized()) {
+            return; // preserve a maximized window across scene switches
+        }
+
+        boolean firstShow = Double.isNaN(stage.getWidth()) || stage.getWidth() <= 0;
+        double targetW = Math.min(firstShow ? 1100 : stage.getWidth(),  vb.getWidth());
+        double targetH = Math.min(firstShow ? 700  : stage.getHeight(), vb.getHeight());
+
+        stage.setWidth(targetW);
+        stage.setHeight(targetH);
+        if (firstShow) {
+            stage.setX(vb.getMinX() + (vb.getWidth()  - targetW) / 2);
+            stage.setY(vb.getMinY() + (vb.getHeight() - targetH) / 2);
         }
     }
 
