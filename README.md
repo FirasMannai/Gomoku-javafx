@@ -37,25 +37,25 @@ java -jar target/Gomokufx-1.0-SNAPSHOT.jar [MODE] [STRAT1] [STRAT2]
 | `SERVER` | `<port>` | Host a network game — waits for client, plays Black |
 | `CLIENT` | `<host> <port>` | Join a network game — connects to server, plays Red |
 
-**Options** (may appear in any position among the arguments):
+**⚙️ Options** (may appear in any position among the arguments):
 
 - **`D`** or **`DEBUG`** — enable the debug move trace (written to `gomoku_debug.txt`). E.g. `PP D`, `PC S4 D`, `CC S2 S4 DEBUG`.
 - **`load=<path>`** — resume from a saved XML game (PP/PC/CC modes). On a load error it warns and starts a fresh board. E.g. `PC S4 load=savedgame.xml`.
 
 These combine, e.g. `PC S4 D load=savedgame.xml` loads the save *and* enables debug.
 
-**AI Strategies:**
+**🤖 AI Strategies:**
 
 | Code | Name | Uses depth | Description |
 |------|------|------------|-------------|
-| `S1` | Random | No | Places stones randomly |
-| `S2` | Block | No | Wins immediately or blocks opponent's immediate win, then random |
-| `S3` | Minimax | Yes | Full minimax tree search |
-| `S4` | AlphaBeta | Yes | Minimax with alpha-beta pruning (strongest) |
+| `S1` | 🎲 Random | No | Places stones randomly |
+| `S2` | 🛡️ Block | No | Wins immediately or blocks opponent's immediate win, then random |
+| `S3` | 🧠 Minimax | Yes | Full minimax tree search |
+| `S4` | ⚡ AlphaBeta | Yes | Minimax with alpha-beta pruning (strongest) |
 
 The depth slider (1–8) applies only to S3 and S4. S1 and S2 ignore it entirely.
 
-**Examples:**
+**📝 Examples:**
 
 ```bash
 java -jar target/Gomokufx-1.0-SNAPSHOT.jar PP
