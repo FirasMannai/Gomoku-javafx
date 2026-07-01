@@ -99,17 +99,17 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full details and flow diagrams.
 
 ## ✨ Game Features
 
-- Configurable board size: 13×13 / 15×15 / 17×17 / 19×19
-- Standard Gomoku rules (5 in a row wins)
-- Four game modes: Player vs Player, Player vs Computer, Computer vs Computer, Network (SERVER/CLIENT)
-- Undo (PC mode) and hint system
-- Save/load games to XML
-- Debug mode — logs move trace to `gomoku_debug.txt`
-- Win highlight animation
-- Arcade-style start screen: GOMOKU 🎯 title with neon glow, Canvas mini board previews, emoji player avatars, AI depth slider (shown only when S3/S4 is selected)
-- **Enhanced game sidebar:** prominent "to move" turn badge, side-by-side score card, game-mode card, and a scrollable **move-history** card — a live elapsed clock in its header, with each row showing the move number, a color stone, the chess-style coordinate (e.g. `H8`), and how long that move took
-- **Last-move marker** highlighting the most recently placed stone on the board
-- Tooltips on every action, with keyboard-shortcut hints
+- 📐 Configurable board size: 13×13 / 15×15 / 17×17 / 19×19
+- ⚫ Standard Gomoku rules (5 in a row wins)
+- 🎮 Four game modes: Player vs Player, Player vs Computer, Computer vs Computer, Network (SERVER/CLIENT)
+- ↩️ Undo (PC mode) and 💡 hint system
+- 💾 Save/load games to XML
+- 🐛 Debug mode — logs move trace to `gomoku_debug.txt`
+- 🏆 Win highlight animation
+- 🕹️ Arcade-style start screen: GOMOKU 🎯 title with neon glow, Canvas mini board previews, emoji player avatars, AI depth slider (shown only when S3/S4 is selected)
+- 📜 **Enhanced game sidebar:** prominent "to move" turn badge, side-by-side score card, game-mode card, and a scrollable **move-history** card — a live elapsed clock in its header, with each row showing the move number, a color stone, the chess-style coordinate (e.g. `H8`), and how long that move took
+- 📍 **Last-move marker** highlighting the most recently placed stone on the board
+- 💬 Tooltips on every action, with keyboard-shortcut hints
 
 ## 🎨 Theming
 
@@ -117,13 +117,13 @@ The UI ships with **seven switchable themes** — pick one from the 🎨 dropdow
 
 | Theme | Look |
 |-------|------|
-| **Dark** | Default red/gold arcade over midnight |
-| **Light** | Clean light arcade |
-| **Neo-Brutalist** | Flat paper, thick black borders, hard offset shadows |
-| **Aurora Glass** | Translucent panels over an indigo→teal gradient, mint/pink accents |
-| **Zen Goban** | Warm washi paper + wood board, black slate / white shell stones |
-| **Neon Grid** | Black background, glowing cyan/magenta grid and stones |
-| **Material** | Light Material You surfaces, indigo accent, elevation |
+| 🌙 **Dark** | Default red/gold arcade over midnight |
+| ☀️ **Light** | Clean light arcade |
+| 🧱 **Neo-Brutalist** | Flat paper, thick black borders, hard offset shadows |
+| 🌌 **Aurora Glass** | Translucent panels over an indigo→teal gradient, mint/pink accents |
+| 🎋 **Zen Goban** | Warm washi paper + wood board, black slate / white shell stones |
+| 💠 **Neon Grid** | Black background, glowing cyan/magenta grid and stones |
+| 🎴 **Material** | Light Material You surfaces, indigo accent, elevation |
 
 Each theme re-skins the canvas board too (board face, grid, stones, glow). Press **T** anywhere to cycle through all themes.
 
