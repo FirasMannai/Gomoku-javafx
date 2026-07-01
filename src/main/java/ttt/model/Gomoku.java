@@ -13,8 +13,10 @@ import java.util.ArrayList;
  * vertical, or diagonal line. Each move returns a new cloned game state, so the
  * object is effectively immutable and safe for AI tree search.
  *
- * <p>The board defaults to {@value #DEFAULT_SIZE} x {@value #DEFAULT_SIZE} but
- * any square size is supported via {@link #Gomoku(byte, byte)}.
+ * <p>The board defaults to {@value #DEFAULT_SIZE} x {@value #DEFAULT_SIZE}. Other
+ * square sizes are supported via {@link #Gomoku(byte, byte)} by passing equal
+ * {@code rows} and {@code cols}; only square boards are fully supported (the
+ * move generation assumes a square board).
  */
 public class Gomoku extends ARegularGame<Pair<Byte, Byte>> {
 
@@ -30,10 +32,12 @@ public class Gomoku extends ARegularGame<Pair<Byte, Byte>> {
     }
 
     /**
-     * Creates a {@code rows} x {@code cols} board.
+     * Creates a board of the given dimensions. Intended for square boards: pass
+     * equal {@code rows} and {@code cols}, since move generation assumes a square
+     * board — non-square boards are not fully supported.
      *
      * @param rows number of board rows
-     * @param cols number of board columns
+     * @param cols number of board columns (should equal {@code rows})
      */
     public Gomoku(byte rows, byte cols) {
         super(rows, cols);
