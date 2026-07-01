@@ -27,9 +27,9 @@ import javafx.util.Duration;
 /**
  * GomokuGameView is the main game window layout using a BorderPane.
  * <p>
- * TOP → Toolbar with Restart, Undo, Hint, Quit + title
+ * TOP → Toolbar with Restart, Undo, Hint, Quit + theme picker + title
  * CENTER → GomokuBoardFX canvas (responsive)
- * RIGHT → Sidebar with game status, mode, info cards + Save/Load
+ * RIGHT → Sidebar with turn badge, score, mode, and move-history cards + Save/Load
  * BOTTOM → Status bar
  * <p>
  * All button actions delegate to GomokuControllerFX.
