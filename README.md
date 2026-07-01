@@ -107,7 +107,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full details and flow diagrams.
 - Debug mode — logs move trace to `gomoku_debug.txt`
 - Win highlight animation
 - Arcade-style start screen: GOMOKU 🎯 title with neon glow, Canvas mini board previews, emoji player avatars, AI depth slider (shown only when S3/S4 is selected)
-- **Enhanced game sidebar:** prominent "to move" turn badge, side-by-side score card, expanded info card (move counter + live elapsed clock + last move + AI/your think times), and a scrollable **move history** list (chess-style coordinates, e.g. `12. 🔴 H8`)
+- **Enhanced game sidebar:** prominent "to move" turn badge, side-by-side score card, game-mode card, and a scrollable **move-history** card — a live elapsed clock in its header, with each row showing the move number, a color stone, the chess-style coordinate (e.g. `H8`), and how long that move took
 - **Last-move marker** highlighting the most recently placed stone on the board
 - Tooltips on every action, with keyboard-shortcut hints
 
