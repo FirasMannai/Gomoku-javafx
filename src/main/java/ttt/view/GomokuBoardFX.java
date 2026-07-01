@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * GomokuBoardFX is a JavaFX Canvas that renders the Gomoku board, stones,
- * hover preview, hint highlight, and winning sequence highlight.
+ * hover preview, hint highlight, last-move marker, and winning sequence highlight.
  * <p>
  * Replaces the Swing-based GomokuBoard for the JavaFX UI without modifying
  * any game logic. Reads game state via IRegularGame and delegates click
