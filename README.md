@@ -1,13 +1,13 @@
-# Gomoku FX
+# 🎯 Gomoku FX
 
 A JavaFX implementation of Gomoku (Five-in-a-Row) with multiple AI difficulty levels and a modern, fully themeable GUI (seven built-in light/dark themes).
 
-## Requirements
+## 📋 Requirements
 
 - Java 11+
 - Maven 3.6+
 
-## Build & Run
+## 🚀 Build & Run
 
 ```bash
 # Run directly with Maven (no JAR needed)
@@ -20,7 +20,7 @@ mvn clean package
 java -jar target/Gomokufx-1.0-SNAPSHOT.jar
 ```
 
-## Command-Line Arguments
+## 💻 Command-Line Arguments
 
 You can skip the launcher and start a game directly:
 
@@ -73,7 +73,7 @@ java -jar target/Gomokufx-1.0-SNAPSHOT.jar SERVER 5000          # terminal 1
 java -jar target/Gomokufx-1.0-SNAPSHOT.jar CLIENT localhost 5000 # terminal 2
 ```
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ttt.model/       — True Model: game rules, board state (Gomoku, IGame, ARegularGame, Pair)
@@ -85,7 +85,7 @@ ttt.controller/  — MVC Controller: GomokuFXApp, GomokuMain, GomokuLauncherCont
 ttt.view/        — MVC View: GomokuLauncherFX, GomokuGameView, GomokuBoardFX, ThemeManager
 ```
 
-## Design Patterns
+## 🧩 Design Patterns
 
 | Pattern | Where |
 |---------|-------|
@@ -97,7 +97,7 @@ ttt.view/        — MVC View: GomokuLauncherFX, GomokuGameView, GomokuBoardFX, 
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full details and flow diagrams.
 
-## Game Features
+## ✨ Game Features
 
 - Configurable board size: 13×13 / 15×15 / 17×17 / 19×19
 - Standard Gomoku rules (5 in a row wins)
@@ -111,7 +111,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full details and flow diagrams.
 - **Last-move marker** highlighting the most recently placed stone on the board
 - Tooltips on every action, with keyboard-shortcut hints
 
-## Theming
+## 🎨 Theming
 
 The UI ships with **seven switchable themes** — pick one from the 🎨 dropdown in the launcher's Match Setup header or in the in-game toolbar. The choice is saved to `~/.gomokufx_theme` and restored on next launch.
 
@@ -127,7 +127,7 @@ The UI ships with **seven switchable themes** — pick one from the 🎨 dropdow
 
 Each theme re-skins the canvas board too (board face, grid, stones, glow). Press **T** anywhere to cycle through all themes.
 
-## Keyboard Shortcuts
+## ⌨️ Keyboard Shortcuts
 
 **Launcher:** `Enter` start match · `Esc` exit · `T` cycle theme
 
