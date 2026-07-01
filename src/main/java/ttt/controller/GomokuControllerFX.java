@@ -644,7 +644,7 @@ public class GomokuControllerFX {
                     if (!winning.isEmpty()) {
                         stats.append("Winning stones: ");
                         for (Pair<Byte, Byte> s : winning)
-                            stats.append("(").append(s.first + 1).append(",").append(s.second + 1).append(") ");
+                            stats.append(coordLabel(s.first, s.second)).append(" ");
                         stats.append("\n");
                     }
                 }
