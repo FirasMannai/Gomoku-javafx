@@ -106,7 +106,7 @@ public abstract int evalState(byte player);
 
 **View** (`ttt.view`): `GomokuLauncherFX` + `GomokuGameView` + `GomokuBoardFX` + `ThemeManager`
 - `GomokuLauncherFX` — start screen, mode/strategy selection, theme picker
-- `GomokuGameView` — BorderPane layout, toolbar, enhanced sidebar (turn badge, score, info, move history), status labels
+- `GomokuGameView` — BorderPane layout, toolbar, enhanced sidebar (turn badge, score, game mode, move history), status labels
 - `GomokuBoardFX` — Canvas rendering (grid, stones, hints, last-move marker, animations); reads the active theme's `BoardPalette`
 - `ThemeManager` — application-wide theme controller (see [Theming](#theming))
 - Never calls game logic directly
@@ -261,6 +261,6 @@ The UI supports **seven switchable themes**: Dark, Light, Neo-Brutalist, Aurora 
 `GomokuGameView` / `GomokuControllerFX` also add a richer in-game layer on top of the base MVC flow:
 
 - **Turn badge** — prominent "X to move" indicator (tinted on Red's turn via a `:red-turn` CSS pseudo-class), reused to show the result on game over.
-- **Move history** — a scrollable `ListView` fed by `GomokuControllerFX.recordMove()`, which centralizes the move counter, last-move label, history entry, and board marker for every mode (human, AI, CC auto-play, network).
+- **Move history** — a scrollable `ListView` fed by `GomokuControllerFX.recordMove()`, which centralizes the move counter, the history entry (with its per-move time), and the board marker for every mode (human, AI, CC auto-play, network).
 - **Elapsed clock** — a 1-second `Timeline` (`startElapsedTimer`) that resets on restart and stops on game over / quit.
 - **Keyboard shortcuts** — `installShortcuts(Scene)`: `R` restart, `H` hint, `Ctrl+Z` undo, `Ctrl+S` save, `Ctrl+L` load, `T` cycle theme, `Esc` quit.
