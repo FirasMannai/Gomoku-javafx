@@ -55,7 +55,7 @@ public class Debugger {
     public static void printMoveHeader() {
         if (!enabled) return;
         if (!headerPrinted) {
-            String header = String.format("\n%-7s%-4s%-4s", "Player", "x", "y");
+            String header = String.format("\n%-8s%s", "Player", "Move");
             String dash = "--------------------";
             System.out.println(header);
             System.out.println(dash);
@@ -71,13 +71,15 @@ public class Debugger {
      * Logs a move to the console and log file, printing the header if needed.
      *
      * @param player The player making the move.
-     * @param row The row index of the move.
-     * @param col The column index of the move.
+     * @param row The row index of the move (0-indexed).
+     * @param col The column index of the move (0-indexed).
      */
     public static void log(int player, int row, int col) {
         if (!enabled) return;
         printMoveHeader(); // Only prints once
-        String msg = String.format("P%-6d%-4d%-4d", player,col,row);
+        // Board notation (e.g. "H7") to match the on-screen move history.
+        String coord = "" + (char) ('A' + col) + (row + 1);
+        String msg = String.format("P%-7d%s", player, coord);
         System.out.println(msg);
         if (fileWriter != null) fileWriter.println(msg);
     }
